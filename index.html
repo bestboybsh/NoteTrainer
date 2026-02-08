@@ -614,6 +614,7 @@
 
             <div class="controls">
                 <button class="btn" id="startBtn">Start</button>
+                <button class="btn" id="stopBtn" disabled style="background:#F44336;">Stop</button>
                 <button class="btn" id="restartBtn" disabled>Restart</button>
             </div>
 
@@ -1137,6 +1138,7 @@
             gameActive = false;
             stopTimer();
             disableKeys();
+            document.getElementById('stopBtn').disabled = true;
 
             // 사용자별 최고점수 저장
             const isNewBest = currentUser ? setUserBest(currentUser, currentDifficulty, score) : false;
@@ -1201,6 +1203,7 @@
             updateScore();
             clearNoteHistory();
             document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
             document.getElementById('restartBtn').disabled = false;
             document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = true);
             document.getElementById('userSelect').disabled = true;
@@ -1220,6 +1223,7 @@
             updateScore();
             clearKeyHighlights();
             document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
             document.getElementById('restartBtn').disabled = true;
             document.getElementById('timer').classList.remove('timer-warning');
             const overlay = document.getElementById('gameOverOverlay');
@@ -1252,6 +1256,9 @@
             startGame();
         });
 
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            if (gameActive) endGame();
+        });
         document.getElementById('restartBtn').addEventListener('click', restartGame);
 
         document.getElementById('userSelect').addEventListener('change', onUserChange);
