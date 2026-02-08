@@ -1,9 +1,20 @@
 // ===== staff.js =====
 // VexFlow를 사용한 악보 오선지 렌더링
 
+// 현재 자리표 ('treble' 또는 'bass')
+let currentStaffClef = 'treble';
+
+function setStaffClef(clef) {
+    currentStaffClef = clef;
+}
+
 // VexFlow 음표 형식 변환 맵 (자연음 + 샵/플랫)
 const vexFlowNotes = {
+    // 자연음 옥타브 2
+    'C2': 'c/2', 'D2': 'd/2', 'E2': 'e/2', 'F2': 'f/2',
+    'G2': 'g/2', 'A2': 'a/2', 'B2': 'b/2',
     // 자연음 옥타브 3
+    'C3': 'c/3', 'D3': 'd/3', 'E3': 'e/3', 'F3': 'f/3',
     'G3': 'g/3', 'A3': 'a/3', 'B3': 'b/3',
     // 자연음 옥타브 4
     'C4': 'c/4', 'D4': 'd/4', 'E4': 'e/4', 'F4': 'f/4',
@@ -11,14 +22,18 @@ const vexFlowNotes = {
     // 자연음 옥타브 5
     'C5': 'c/5', 'D5': 'd/5', 'E5': 'e/5', 'F5': 'f/5',
     'G5': 'g/5', 'A5': 'a/5', 'B5': 'b/5',
+    // 샵 옥타브 2
+    'C#2': 'c#/2', 'D#2': 'd#/2', 'F#2': 'f#/2', 'G#2': 'g#/2', 'A#2': 'a#/2',
     // 샵 옥타브 3
-    'G#3': 'g#/3', 'A#3': 'a#/3',
+    'C#3': 'c#/3', 'D#3': 'd#/3', 'F#3': 'f#/3', 'G#3': 'g#/3', 'A#3': 'a#/3',
     // 샵 옥타브 4
     'C#4': 'c#/4', 'D#4': 'd#/4', 'F#4': 'f#/4', 'G#4': 'g#/4', 'A#4': 'a#/4',
     // 샵 옥타브 5
     'C#5': 'c#/5', 'D#5': 'd#/5', 'F#5': 'f#/5', 'G#5': 'g#/5', 'A#5': 'a#/5',
+    // 플랫 옥타브 2
+    'Db2': 'db/2', 'Eb2': 'eb/2', 'Gb2': 'gb/2', 'Ab2': 'ab/2', 'Bb2': 'bb/2',
     // 플랫 옥타브 3
-    'Ab3': 'ab/3', 'Bb3': 'bb/3',
+    'Db3': 'db/3', 'Eb3': 'eb/3', 'Gb3': 'gb/3', 'Ab3': 'ab/3', 'Bb3': 'bb/3',
     // 플랫 옥타브 4
     'Db4': 'db/4', 'Eb4': 'eb/4', 'Gb4': 'gb/4', 'Ab4': 'ab/4', 'Bb4': 'bb/4',
     // 플랫 옥타브 5
@@ -27,10 +42,12 @@ const vexFlowNotes = {
 
 // 임시표(accidental) 정보
 const noteAccidentals = {
-    'G#3': '#', 'A#3': '#',
+    'C#2': '#', 'D#2': '#', 'F#2': '#', 'G#2': '#', 'A#2': '#',
+    'C#3': '#', 'D#3': '#', 'F#3': '#', 'G#3': '#', 'A#3': '#',
     'C#4': '#', 'D#4': '#', 'F#4': '#', 'G#4': '#', 'A#4': '#',
     'C#5': '#', 'D#5': '#', 'F#5': '#', 'G#5': '#', 'A#5': '#',
-    'Ab3': 'b', 'Bb3': 'b',
+    'Db2': 'b', 'Eb2': 'b', 'Gb2': 'b', 'Ab2': 'b', 'Bb2': 'b',
+    'Db3': 'b', 'Eb3': 'b', 'Gb3': 'b', 'Ab3': 'b', 'Bb3': 'b',
     'Db4': 'b', 'Eb4': 'b', 'Gb4': 'b', 'Ab4': 'b', 'Bb4': 'b',
     'Db5': 'b', 'Eb5': 'b', 'Gb5': 'b', 'Ab5': 'b', 'Bb5': 'b'
 };
@@ -40,12 +57,25 @@ function getDisplayName(noteName) {
     return noteName.replace(/[0-9]/g, '');
 }
 
-// 줄기 방향 결정 (B4 기준)
+// 줄기 방향 결정
+// 높은음자리표: B4 기준 (B4이하 위로, C5이상 아래로)
+// 낮은음자리표: D3 기준 (D3이하 위로, E3이상 아래로)
 function getStemDirection(noteName) {
+    const letter = noteName.charAt(0);
     const octave = parseInt(noteName.replace(/[^0-9]/g, '')) || 4;
-    if (octave >= 5) return -1;
-    if (octave <= 3) return 1;
-    return 1; // 옥타브 4: 위로
+
+    if (currentStaffClef === 'bass') {
+        // 낮은음자리표: D3이 중간선
+        if (octave < 3) return 1;
+        if (octave > 3) return -1;
+        // 옥타브 3: D3까지 위로, E3부터 아래로
+        return ['C', 'D'].includes(letter) ? 1 : -1;
+    } else {
+        // 높은음자리표: B4가 중간선
+        if (octave >= 5) return -1;
+        if (octave <= 3) return 1;
+        return 1; // 옥타브 4: 위로
+    }
 }
 
 // 이전 음 히스토리 (최대 2개)
@@ -86,7 +116,7 @@ function createStaveNote(VF, noteName, stemDir, showLabel) {
     if (!vexKey) return null;
 
     const note = new VF.StaveNote({
-        clef: 'treble',
+        clef: currentStaffClef,
         keys: [vexKey],
         duration: 'q',
         stem_direction: stemDir
@@ -108,7 +138,6 @@ function createStaveNote(VF, noteName, stemDir, showLabel) {
             const label = getDisplayName(noteName);
             const annotation = new VF.Annotation(label);
             annotation.setFont('Arial', 11, 'bold');
-            // 줄기가 위로 가면 라벨은 아래에, 줄기가 아래로 가면 라벨도 아래에
             if (VF.Annotation.VerticalJustify) {
                 annotation.setVerticalJustification(VF.Annotation.VerticalJustify.BOTTOM);
             } else {
@@ -143,7 +172,7 @@ function initStaff() {
 
     const staveWidth = (dim.width / sc) - 20;
     const stave = new VF.Stave(10, 30, staveWidth);
-    stave.addClef('treble');
+    stave.addClef(currentStaffClef);
     stave.setContext(context).draw();
 }
 
@@ -168,7 +197,7 @@ function renderStaff(currentNote, feedbackNote, feedbackColor) {
 
     const staveWidth = (dim.width / sc) - 20;
     const stave = new VF.Stave(10, 30, staveWidth);
-    stave.addClef('treble');
+    stave.addClef(currentStaffClef);
     stave.setContext(context).draw();
 
     try {

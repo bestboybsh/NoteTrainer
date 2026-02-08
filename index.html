@@ -194,6 +194,42 @@
             transform: none;
         }
 
+        /* 자리표 선택 */
+        .clef-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .clef-btn {
+            padding: 8px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            background: white;
+            color: #777;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .clef-btn:hover {
+            border-color: #9C27B0;
+            color: #9C27B0;
+        }
+
+        .clef-btn.active {
+            background: #9C27B0;
+            border-color: #9C27B0;
+            color: white;
+        }
+
+        .clef-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* 난이도 선택 */
         .difficulty-container {
             display: flex;
@@ -633,6 +669,11 @@
                 </div>
             </div>
 
+            <div class="clef-container">
+                <button class="clef-btn active" data-clef="treble">🎼 높은음자리표</button>
+                <button class="clef-btn" data-clef="bass">🎼 낮은음자리표</button>
+            </div>
+
             <div class="difficulty-container">
                 <button class="diff-btn active" data-diff="beginner">초급</button>
                 <button class="diff-btn" data-diff="intermediate">중급</button>
@@ -681,52 +722,87 @@
         let timeLeft = 60;
         const GAME_TIME = 60;
         let currentDifficulty = 'beginner';
+        let currentClef = 'treble';
         let currentUser = null;
 
         const STORAGE_KEY = 'noteTrainerData';
 
         // 전체 음표 주파수 (자연음 + 샵 + 플랫)
         const noteFrequencies = {
+            'C2': 65.41, 'D2': 73.42, 'E2': 82.41, 'F2': 87.31,
+            'G2': 98.00, 'A2': 110.00, 'B2': 123.47,
+            'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61,
             'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
             'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
             'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
             'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46,
             'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
-            'G#3': 207.65, 'A#3': 233.08,
+            'C#2': 69.30, 'D#2': 77.78, 'F#2': 92.50, 'G#2': 103.83, 'A#2': 116.54,
+            'Db2': 69.30, 'Eb2': 77.78, 'Gb2': 92.50, 'Ab2': 103.83, 'Bb2': 116.54,
+            'C#3': 138.59, 'D#3': 155.56, 'F#3': 185.00, 'G#3': 207.65, 'A#3': 233.08,
+            'Db3': 138.59, 'Eb3': 155.56, 'Gb3': 185.00, 'Ab3': 207.65, 'Bb3': 233.08,
             'C#4': 277.18, 'D#4': 311.13, 'F#4': 369.99, 'G#4': 415.30, 'A#4': 466.16,
-            'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61,
-            'Ab3': 207.65, 'Bb3': 233.08,
             'Db4': 277.18, 'Eb4': 311.13, 'Gb4': 369.99, 'Ab4': 415.30, 'Bb4': 466.16,
+            'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61,
             'Db5': 554.37, 'Eb5': 622.25, 'Gb5': 739.99, 'Ab5': 830.61
         };
 
-        // 난이도별 음표 풀
+        // 난이도 + 자리표별 음표 풀
         const notePools = {
-            beginner: [
-                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'
-            ],
-            intermediate: [
-                'G3', 'A3', 'B3',
-                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
-                'C5', 'D5', 'E5', 'F5', 'G5', 'A5',
-                'G#3', 'A#3',
-                'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
-                'C#5', 'D#5', 'F#5', 'G#5',
-                'Ab3', 'Bb3',
-                'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
-                'Db5', 'Eb5', 'Gb5', 'Ab5'
-            ],
-            advanced: [
-                'G3', 'A3', 'B3',
-                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
-                'C5', 'D5', 'E5', 'F5', 'G5', 'A5',
-                'G#3', 'A#3',
-                'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
-                'C#5', 'D#5', 'F#5', 'G#5',
-                'Ab3', 'Bb3',
-                'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
-                'Db5', 'Eb5', 'Gb5', 'Ab5'
-            ]
+            treble: {
+                beginner: [
+                    'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'
+                ],
+                intermediate: [
+                    'G3', 'A3', 'B3',
+                    'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+                    'C5', 'D5', 'E5', 'F5', 'G5', 'A5',
+                    'G#3', 'A#3',
+                    'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
+                    'C#5', 'D#5', 'F#5', 'G#5',
+                    'Ab3', 'Bb3',
+                    'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
+                    'Db5', 'Eb5', 'Gb5', 'Ab5'
+                ],
+                advanced: [
+                    'G3', 'A3', 'B3',
+                    'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+                    'C5', 'D5', 'E5', 'F5', 'G5', 'A5',
+                    'G#3', 'A#3',
+                    'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
+                    'C#5', 'D#5', 'F#5', 'G#5',
+                    'Ab3', 'Bb3',
+                    'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
+                    'Db5', 'Eb5', 'Gb5', 'Ab5'
+                ]
+            },
+            bass: {
+                beginner: [
+                    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'
+                ],
+                intermediate: [
+                    'G2', 'A2', 'B2',
+                    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
+                    'C4', 'D4', 'E4',
+                    'G#2', 'A#2',
+                    'C#3', 'D#3', 'F#3', 'G#3', 'A#3',
+                    'C#4', 'D#4',
+                    'Ab2', 'Bb2',
+                    'Db3', 'Eb3', 'Gb3', 'Ab3', 'Bb3',
+                    'Db4', 'Eb4'
+                ],
+                advanced: [
+                    'G2', 'A2', 'B2',
+                    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
+                    'C4', 'D4', 'E4',
+                    'G#2', 'A#2',
+                    'C#3', 'D#3', 'F#3', 'G#3', 'A#3',
+                    'C#4', 'D#4',
+                    'Ab2', 'Bb2',
+                    'Db3', 'Eb3', 'Gb3', 'Ab3', 'Bb3',
+                    'Db4', 'Eb4'
+                ]
+            }
         };
 
         // 샵 ↔ 플랫 변환
@@ -737,22 +813,35 @@
             'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
         };
 
-        // 건반 설정
+        // 건반 설정 (자리표 + 난이도별)
         const keyboardConfigs = {
-            beginner: {
-                whiteKeys: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'],
-                showBlack: true,
-                compact: false
+            treble: {
+                beginner: {
+                    whiteKeys: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'],
+                    showBlack: true, compact: false
+                },
+                intermediate: {
+                    whiteKeys: ['G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'],
+                    showBlack: true, compact: true
+                },
+                advanced: {
+                    whiteKeys: ['G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'],
+                    showBlack: true, compact: true
+                }
             },
-            intermediate: {
-                whiteKeys: ['G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'],
-                showBlack: true,
-                compact: true
-            },
-            advanced: {
-                whiteKeys: ['G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'],
-                showBlack: true,
-                compact: true
+            bass: {
+                beginner: {
+                    whiteKeys: ['C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'],
+                    showBlack: true, compact: false
+                },
+                intermediate: {
+                    whiteKeys: ['G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4'],
+                    showBlack: true, compact: true
+                },
+                advanced: {
+                    whiteKeys: ['G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4'],
+                    showBlack: true, compact: true
+                }
             }
         };
 
@@ -769,8 +858,9 @@
         let isBlackKeyFlat = false;
 
         // 피아노 건반 동적 생성
-        function buildPianoKeyboard(difficulty) {
-            const config = keyboardConfigs[difficulty] || keyboardConfigs.beginner;
+        function buildPianoKeyboard(difficulty, clef) {
+            const clefConfigs = keyboardConfigs[clef || currentClef] || keyboardConfigs.treble;
+            const config = clefConfigs[difficulty] || clefConfigs.beginner;
             const piano = document.getElementById('noteButtons');
             piano.innerHTML = '';
 
@@ -1000,6 +1090,10 @@
             try {
                 synth = new Tone.Sampler({
                     urls: {
+                        'A1':  'A1.mp3',
+                        'C2':  'C2.mp3',
+                        'A2':  'A2.mp3',
+                        'C3':  'C3.mp3',
                         'A3':  'A3.mp3',
                         'C4':  'C4.mp3',
                         'D#4': 'Ds4.mp3',
@@ -1066,7 +1160,8 @@
 
         // ===== 게임 로직 =====
         function getRandomNote() {
-            const pool = notePools[currentDifficulty] || notePools.beginner;
+            const clefPool = notePools[currentClef] || notePools.treble;
+            const pool = clefPool[currentDifficulty] || clefPool.beginner;
             return pool[Math.floor(Math.random() * pool.length)];
         }
 
@@ -1177,6 +1272,8 @@
                 renderStaff(currentNote, currentNote, 'blue');
                 highlightKey(selectedNote, 'key-correct');
             } else {
+                score = Math.max(0, score - 1);
+                updateScore();
                 addToHistory(currentNote, 'red');
                 renderStaff(currentNote, currentNote, 'red');
                 highlightKey(selectedNote, 'key-wrong');
@@ -1291,11 +1388,13 @@
             score = 0;
             updateScore();
             clearNoteHistory();
+            setStaffClef(currentClef);
             buildPianoKeyboard(currentDifficulty);
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
             document.getElementById('restartBtn').disabled = false;
             document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = true);
+            document.querySelectorAll('.clef-btn').forEach(btn => btn.disabled = true);
             document.getElementById('userSelect').disabled = true;
             document.getElementById('addUserBtn').disabled = true;
             document.getElementById('delUserBtn').disabled = true;
@@ -1319,9 +1418,11 @@
             const overlay = document.getElementById('gameOverOverlay');
             if (overlay) overlay.remove();
             document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = false);
+            document.querySelectorAll('.clef-btn').forEach(btn => btn.disabled = false);
             document.getElementById('userSelect').disabled = false;
             document.getElementById('addUserBtn').disabled = false;
             document.getElementById('delUserBtn').disabled = false;
+            setStaffClef(currentClef);
             buildPianoKeyboard(currentDifficulty);
             disableKeys();
             clearNoteHistory();
@@ -1329,6 +1430,22 @@
         }
 
         // ===== 이벤트 리스너 =====
+
+        // 자리표 선택
+        document.querySelectorAll('.clef-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (gameActive) return;
+                document.querySelectorAll('.clef-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentClef = btn.getAttribute('data-clef');
+                setStaffClef(currentClef);
+                buildPianoKeyboard(currentDifficulty);
+                disableKeys();
+                clearNoteHistory();
+                initStaff();
+                updateBestScoreDisplay();
+            });
+        });
 
         // 난이도 선택
         document.querySelectorAll('.diff-btn').forEach(btn => {
