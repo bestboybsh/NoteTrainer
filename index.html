@@ -252,18 +252,7 @@
 
         /* Middle C 표시 */
         .piano-key.middle-c {
-            border-bottom: 4px solid #FF9800;
-        }
-        .piano-key.middle-c::after {
-            content: 'M';
-            position: absolute;
-            top: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.6rem;
-            font-weight: bold;
-            color: #FF9800;
-            opacity: 0.7;
+            color: #E53935;
         }
 
         .piano-key {
@@ -410,7 +399,6 @@
             width: 26px; height: 108px; right: -13px; font-size: 0.55rem;
         }
         .piano.compact .black-key.active-black:active { height: 106px; }
-        .piano.compact .piano-key.middle-c::after { font-size: 0.5rem; top: 4px; }
 
         .flash-green { animation: flashGreen 0.3s ease-in-out; }
         .flash-red { animation: flashRed 0.3s ease-in-out; }
