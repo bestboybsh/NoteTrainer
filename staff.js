@@ -63,8 +63,8 @@ function getVF() {
 function getStaffDimensions() {
     const container = document.getElementById('staffContainer');
     const containerWidth = container ? container.clientWidth : 400;
-    const width = Math.max(300, Math.min(420, containerWidth - 20));
-    return { width: width, height: 180 };
+    const width = Math.max(500, Math.min(750, containerWidth - 20));
+    return { width: width, height: 500, scale: 2.8 };
 }
 
 // 히스토리 초기화
@@ -135,12 +135,14 @@ function initStaff() {
     clearNoteHistory();
 
     const dim = getStaffDimensions();
+    const sc = dim.scale || 1;
     const renderer = new VF.Renderer(staffDiv, VF.Renderer.Backends.SVG);
     renderer.resize(dim.width, dim.height);
     const context = renderer.getContext();
+    context.scale(sc, sc);
 
-    const staveWidth = dim.width - 20;
-    const stave = new VF.Stave(10, 40, staveWidth);
+    const staveWidth = (dim.width / sc) - 20;
+    const stave = new VF.Stave(10, 30, staveWidth);
     stave.addClef('treble');
     stave.setContext(context).draw();
 }
@@ -158,12 +160,14 @@ function renderStaff(currentNote, feedbackNote, feedbackColor) {
     staffDiv.innerHTML = '';
 
     const dim = getStaffDimensions();
+    const sc = dim.scale || 1;
     const renderer = new VF.Renderer(staffDiv, VF.Renderer.Backends.SVG);
     renderer.resize(dim.width, dim.height);
     const context = renderer.getContext();
+    context.scale(sc, sc);
 
-    const staveWidth = dim.width - 20;
-    const stave = new VF.Stave(10, 40, staveWidth);
+    const staveWidth = (dim.width / sc) - 20;
+    const stave = new VF.Stave(10, 30, staveWidth);
     stave.addClef('treble');
     stave.setContext(context).draw();
 
