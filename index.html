@@ -13,44 +13,128 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background: #f5f5f5;
             min-height: 100vh;
             padding: 20px;
         }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
+        /* ===== 전체 레이아웃: 게임(왼쪽) + 스코어보드(오른쪽) ===== */
+        .page-wrapper {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        /* 게임 영역 */
+        .game-area {
+            flex: 1;
+            min-width: 0;
+            background: white;
+            border-radius: 16px;
+            padding: 30px 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             text-align: center;
         }
 
+        /* 스코어보드 */
+        .scoreboard {
+            width: 280px;
+            flex-shrink: 0;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+            font-size: 2rem;
+            margin-bottom: 15px;
             color: #333;
+        }
+
+        /* ===== 사용자 선택 ===== */
+        .user-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .user-section label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        #userSelect {
+            padding: 6px 12px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            min-width: 120px;
+            cursor: pointer;
+        }
+
+        #userSelect:focus {
+            border-color: #2196F3;
+            outline: none;
+        }
+
+        .user-add-btn {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .user-add-btn:hover {
+            background: #388E3C;
+        }
+
+        .user-del-btn {
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            border: 2px solid #F44336;
+            border-radius: 8px;
+            background: white;
+            color: #F44336;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .user-del-btn:hover {
+            background: #F44336;
+            color: white;
         }
 
         .score-container {
             display: flex;
             justify-content: center;
             gap: 30px;
-            margin-bottom: 30px;
-            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
             color: #555;
         }
 
         .score-item {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
 
         .score-value {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: bold;
             color: #2196F3;
         }
@@ -60,7 +144,7 @@
             border: 2px solid #ddd;
             border-radius: 8px;
             padding: 20px;
-            margin: 30px 0;
+            margin: 20px 0;
             min-height: 200px;
             display: flex;
             justify-content: center;
@@ -78,12 +162,12 @@
         }
 
         .controls {
-            margin: 30px 0;
+            margin: 20px 0;
         }
 
         .btn {
-            padding: 12px 30px;
-            font-size: 1.1rem;
+            padding: 10px 24px;
+            font-size: 1rem;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -91,7 +175,7 @@
             color: white;
             font-weight: bold;
             transition: all 0.2s;
-            margin: 0 10px 10px 10px;
+            margin: 0 8px 8px 8px;
         }
 
         .btn:hover {
@@ -109,8 +193,44 @@
             transform: none;
         }
 
+        /* 난이도 선택 */
+        .difficulty-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .diff-btn {
+            padding: 7px 18px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            background: white;
+            color: #777;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .diff-btn:hover {
+            border-color: #2196F3;
+            color: #2196F3;
+        }
+
+        .diff-btn.active {
+            background: #2196F3;
+            border-color: #2196F3;
+            color: white;
+        }
+
+        .diff-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .piano-container {
-            margin-top: 30px;
+            margin-top: 20px;
             display: flex;
             justify-content: center;
         }
@@ -122,14 +242,12 @@
             user-select: none;
         }
 
-        /* 흰 건반 래퍼 (검은건반 위치 기준) */
         .white-key-wrapper {
             position: relative;
             width: 64px;
             height: 200px;
         }
 
-        /* 흰 건반 */
         .piano-key {
             position: relative;
             width: 64px;
@@ -183,7 +301,25 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.15), inset 0 -2px 3px rgba(0,0,0,0.05);
         }
 
-        /* 검은 건반 */
+        .piano-key.key-correct {
+            background: linear-gradient(to bottom, #66BB6A, #43A047 10%, #388E3C 85%, #2E7D32) !important;
+            color: white !important;
+            border-color: #2E7D32;
+        }
+
+        .piano-key.key-wrong {
+            background: linear-gradient(to bottom, #EF5350, #F44336 10%, #E53935 85%, #D32F2F) !important;
+            color: white !important;
+            border-color: #D32F2F;
+        }
+
+        .piano-key.key-show-answer {
+            box-shadow: 0 0 0 4px #F44336, 0 4px 8px rgba(0,0,0,0.15) !important;
+            color: #F44336 !important;
+            font-size: 1.5rem !important;
+            border-color: #F44336 !important;
+        }
+
         .black-key {
             position: absolute;
             top: 0;
@@ -196,37 +332,69 @@
             z-index: 2;
             box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 -2px 4px rgba(255,255,255,0.05);
             pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: transparent;
+            cursor: default;
         }
 
-        .flash-green {
-            animation: flashGreen 0.3s ease-in-out;
+        .black-key.active-black {
+            pointer-events: auto;
+            cursor: pointer;
+            color: #ccc;
         }
 
-        .flash-red {
-            animation: flashRed 0.3s ease-in-out;
+        .black-key.active-black:hover {
+            background: linear-gradient(to bottom, #555, #333 40%, #222 90%, #111);
         }
+
+        .black-key.active-black:active {
+            background: linear-gradient(to bottom, #444, #222);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            transform: translateY(2px);
+            height: 118px;
+        }
+
+        .black-key.active-black:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .black-key.key-correct {
+            background: linear-gradient(to bottom, #66BB6A, #43A047 40%, #388E3C 90%, #2E7D32) !important;
+            color: white !important;
+        }
+
+        .black-key.key-wrong {
+            background: linear-gradient(to bottom, #EF5350, #F44336 40%, #E53935 90%, #D32F2F) !important;
+            color: white !important;
+        }
+
+        .black-key.key-show-answer {
+            box-shadow: 0 0 0 3px #F44336, 0 4px 6px rgba(0,0,0,0.4) !important;
+            color: #F44336 !important;
+        }
+
+        .flash-green { animation: flashGreen 0.3s ease-in-out; }
+        .flash-red { animation: flashRed 0.3s ease-in-out; }
 
         @keyframes flashGreen {
             0% { background-color: white; }
             50% { background-color: #4CAF50; }
             100% { background-color: white; }
         }
-
         @keyframes flashRed {
             0% { background-color: white; }
             50% { background-color: #F44336; }
             100% { background-color: white; }
         }
 
-        #loadingMsg {
-            color: #999;
-            font-size: 1rem;
-        }
-
-        #errorMsg {
-            color: red;
-            padding: 10px;
-        }
+        #loadingMsg { color: #999; font-size: 1rem; }
+        #errorMsg { color: red; padding: 10px; }
 
         .timer-warning {
             color: #F44336 !important;
@@ -238,12 +406,11 @@
             to { opacity: 0.4; }
         }
 
+        /* ===== 게임 종료 오버레이 ===== */
         .game-over-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.6);
             display: flex;
             justify-content: center;
@@ -261,52 +428,113 @@
             width: 90%;
         }
 
-        .game-over-box h2 {
-            font-size: 2rem;
+        .game-over-box h2 { font-size: 2rem; color: #333; margin-bottom: 20px; }
+        .game-over-box .final-score { font-size: 3rem; font-weight: bold; color: #2196F3; margin: 15px 0; }
+        .game-over-box .new-best { color: #4CAF50; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; }
+        .game-over-box .btn { margin-top: 20px; }
+
+        /* ===== 스코어보드 ===== */
+        .scoreboard h2 {
+            font-size: 1.3rem;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
         }
 
-        .game-over-box .final-score {
-            font-size: 3rem;
+        .sb-diff-section {
+            margin-bottom: 16px;
+        }
+
+        .sb-diff-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .sb-diff-title.beginner { background: #4CAF50; }
+        .sb-diff-title.intermediate { background: #FF9800; }
+        .sb-diff-title.advanced { background: #F44336; }
+
+        .sb-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .sb-table th {
+            text-align: left;
+            padding: 4px 8px;
+            color: #999;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sb-table td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .sb-table td:last-child {
+            text-align: right;
             font-weight: bold;
             color: #2196F3;
-            margin: 15px 0;
         }
 
-        .game-over-box .new-best {
-            color: #4CAF50;
+        .sb-table tr.current-user td {
+            background: #E3F2FD;
             font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
         }
 
-        .game-over-box .btn {
-            margin-top: 20px;
+        .sb-table tr.current-user td:first-child::before {
+            content: '▸ ';
+            color: #2196F3;
+        }
+
+        .sb-no-scores {
+            color: #ccc;
+            font-size: 0.85rem;
+            text-align: center;
+            padding: 8px;
+        }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 900px) {
+            .page-wrapper {
+                flex-direction: column;
+            }
+
+            .scoreboard {
+                width: 100%;
+                order: 2;
+            }
+
+            .game-area {
+                order: 1;
+            }
         }
 
         @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
-            }
+            h1 { font-size: 1.6rem; }
 
             .score-container {
-                font-size: 1rem;
-                gap: 20px;
+                font-size: 0.95rem;
+                gap: 15px;
             }
 
-            .score-value {
-                font-size: 1.5rem;
-            }
+            .score-value { font-size: 1.3rem; }
 
             .white-key-wrapper {
                 width: 48px;
                 height: 160px;
             }
 
-            .piano {
-                height: 160px;
-            }
+            .piano { height: 160px; }
 
             .piano-key {
                 width: 48px;
@@ -324,74 +552,112 @@
                 width: 30px;
                 height: 95px;
                 right: -16px;
+                font-size: 0.6rem;
+            }
+
+            .diff-btn {
+                padding: 6px 14px;
+                font-size: 0.85rem;
             }
 
             .btn {
-                padding: 10px 20px;
-                font-size: 1rem;
+                padding: 8px 18px;
+                font-size: 0.95rem;
+            }
+
+            .user-section {
+                gap: 5px;
+            }
+
+            #userSelect {
+                min-width: 80px;
+                font-size: 0.9rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Music Sight-Reading Trainer</h1>
-        
-        <div class="score-container">
-            <div class="score-item">
-                <span>Score</span>
-                <span class="score-value" id="currentScore">0</span>
+    <div class="page-wrapper">
+        <!-- 게임 영역 -->
+        <div class="game-area">
+            <h1>🎵 Music Sight-Reading</h1>
+
+            <!-- 사용자 선택 -->
+            <div class="user-section">
+                <label>👤</label>
+                <select id="userSelect"></select>
+                <button class="user-add-btn" id="addUserBtn">+ 추가</button>
+                <button class="user-del-btn" id="delUserBtn">삭제</button>
             </div>
-            <div class="score-item">
-                <span>Best</span>
-                <span class="score-value" id="bestScore">0</span>
+
+            <div class="score-container">
+                <div class="score-item">
+                    <span>Score</span>
+                    <span class="score-value" id="currentScore">0</span>
+                </div>
+                <div class="score-item">
+                    <span>Best</span>
+                    <span class="score-value" id="bestScore">0</span>
+                </div>
+                <div class="score-item">
+                    <span>Time</span>
+                    <span class="score-value" id="timer">1:00</span>
+                </div>
             </div>
-            <div class="score-item">
-                <span>Time</span>
-                <span class="score-value" id="timer">1:00</span>
+
+            <div class="difficulty-container">
+                <button class="diff-btn active" data-diff="beginner">초급</button>
+                <button class="diff-btn" data-diff="intermediate">중급</button>
+                <button class="diff-btn" data-diff="advanced">고급</button>
+            </div>
+
+            <div class="controls">
+                <button class="btn" id="startBtn">Start</button>
+                <button class="btn" id="restartBtn" disabled>Restart</button>
+            </div>
+
+            <div class="staff-container" id="staffContainer">
+                <div id="staffDiv"></div>
+                <div id="loadingMsg">Loading...</div>
+                <div id="errorMsg" style="display: none;"></div>
+            </div>
+
+            <div class="piano-container">
+                <div class="piano" id="noteButtons">
+                    <div class="white-key-wrapper">
+                        <button class="piano-key" data-note="C" disabled>C</button>
+                        <button class="black-key" data-note="C#" disabled>C#</button>
+                    </div>
+                    <div class="white-key-wrapper">
+                        <button class="piano-key" data-note="D" disabled>D</button>
+                        <button class="black-key" data-note="D#" disabled>D#</button>
+                    </div>
+                    <div class="white-key-wrapper">
+                        <button class="piano-key" data-note="E" disabled>E</button>
+                    </div>
+                    <div class="white-key-wrapper">
+                        <button class="piano-key" data-note="F" disabled>F</button>
+                        <button class="black-key" data-note="F#" disabled>F#</button>
+                    </div>
+                    <div class="white-key-wrapper">
+                        <button class="piano-key" data-note="G" disabled>G</button>
+                        <button class="black-key" data-note="G#" disabled>G#</button>
+                    </div>
+                    <div class="white-key-wrapper">
+                        <button class="piano-key" data-note="A" disabled>A</button>
+                        <button class="black-key" data-note="A#" disabled>A#</button>
+                    </div>
+                    <div class="white-key-wrapper">
+                        <button class="piano-key" data-note="B" disabled>B</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="controls">
-            <button class="btn" id="startBtn">Start</button>
-            <button class="btn" id="restartBtn" disabled>Restart</button>
-        </div>
-
-        <div class="staff-container" id="staffContainer">
-            <div id="staffDiv"></div>
-            <div id="loadingMsg">Loading...</div>
-            <div id="errorMsg" style="display: none;"></div>
-        </div>
-
-        <div class="piano-container">
-            <div class="piano" id="noteButtons">
-                <div class="white-key-wrapper">
-                    <button class="piano-key" data-note="C" disabled>C</button>
-                    <div class="black-key"></div>
-                </div>
-                <div class="white-key-wrapper">
-                    <button class="piano-key" data-note="D" disabled>D</button>
-                    <div class="black-key"></div>
-                </div>
-                <div class="white-key-wrapper">
-                    <button class="piano-key" data-note="E" disabled>E</button>
-                </div>
-                <div class="white-key-wrapper">
-                    <button class="piano-key" data-note="F" disabled>F</button>
-                    <div class="black-key"></div>
-                </div>
-                <div class="white-key-wrapper">
-                    <button class="piano-key" data-note="G" disabled>G</button>
-                    <div class="black-key"></div>
-                </div>
-                <div class="white-key-wrapper">
-                    <button class="piano-key" data-note="A" disabled>A</button>
-                    <div class="black-key"></div>
-                </div>
-                <div class="white-key-wrapper">
-                    <button class="piano-key" data-note="B" disabled>B</button>
-                </div>
-            </div>
+        <!-- 스코어보드 -->
+        <div class="scoreboard">
+            <h2>🏆 Score Board</h2>
+            <div id="scoreboardContent"></div>
         </div>
     </div>
 
@@ -410,25 +676,240 @@
         let gameActive = false;
         let audioUnlocked = false;
         let timerInterval = null;
-        let timeLeft = 60; // 1분
+        let timeLeft = 60;
         const GAME_TIME = 60;
+        let currentDifficulty = 'beginner';
+        let currentUser = null;
 
-        // 음표별 주파수
+        const STORAGE_KEY = 'noteTrainerData';
+
+        // 전체 음표 주파수 (자연음 + 샵 + 플랫)
         const noteFrequencies = {
             'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
             'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
             'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46,
-            'G5': 783.99, 'A5': 880.00, 'B5': 987.77
+            'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
+            'C#4': 277.18, 'D#4': 311.13, 'F#4': 369.99, 'G#4': 415.30, 'A#4': 466.16,
+            'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61, 'A#5': 932.33,
+            'Db4': 277.18, 'Eb4': 311.13, 'Gb4': 369.99, 'Ab4': 415.30, 'Bb4': 466.16,
+            'Db5': 554.37, 'Eb5': 622.25, 'Gb5': 739.99, 'Ab5': 830.61, 'Bb5': 932.33
         };
+
+        // 난이도별 음표 풀
+        const notePools = {
+            beginner: [
+                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+                'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5'
+            ],
+            intermediate: [
+                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+                'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
+                'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
+                'C#5', 'D#5', 'F#5', 'G#5', 'A#5',
+                'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
+                'Db5', 'Eb5', 'Gb5', 'Ab5', 'Bb5'
+            ],
+            advanced: [
+                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+                'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
+                'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
+                'C#5', 'D#5', 'F#5', 'G#5', 'A#5',
+                'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
+                'Db5', 'Eb5', 'Gb5', 'Ab5', 'Bb5'
+            ]
+        };
+
+        // 샵 ↔ 플랫 변환 맵 (검은 건반 전환용)
+        const sharpLabels = ['C#', 'D#', 'F#', 'G#', 'A#'];
+        const flatLabels  = ['Db', 'Eb', 'Gb', 'Ab', 'Bb'];
+
+        // 플랫→샵 변환 (Tone.js 재생용)
+        const flatToSharp = {
+            'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
+        };
+
+        // 현재 건반이 플랫 모드인지
+        let isBlackKeyFlat = false;
+
+        const diffNames = {
+            beginner: '초급',
+            intermediate: '중급',
+            advanced: '고급'
+        };
+
+        // ===== 사용자 데이터 관리 (LocalStorage) =====
+        function loadData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return { users: {}, lastUser: null };
+        }
+
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function getUserBest(userName, difficulty) {
+            const data = loadData();
+            if (data.users[userName] && data.users[userName][difficulty] !== undefined) {
+                return data.users[userName][difficulty];
+            }
+            return 0;
+        }
+
+        function setUserBest(userName, difficulty, score) {
+            const data = loadData();
+            if (!data.users[userName]) {
+                data.users[userName] = {};
+            }
+            const current = data.users[userName][difficulty] || 0;
+            if (score > current) {
+                data.users[userName][difficulty] = score;
+                saveData(data);
+                return true; // 새 최고점
+            }
+            return false;
+        }
+
+        function addUser(name) {
+            const data = loadData();
+            if (data.users[name]) return false; // 이미 존재
+            data.users[name] = {};
+            data.lastUser = name;
+            saveData(data);
+            return true;
+        }
+
+        function removeUser(name) {
+            const data = loadData();
+            delete data.users[name];
+            if (data.lastUser === name) {
+                const names = Object.keys(data.users);
+                data.lastUser = names.length > 0 ? names[0] : null;
+            }
+            saveData(data);
+        }
+
+        function getUserList() {
+            const data = loadData();
+            return Object.keys(data.users);
+        }
+
+        // ===== 사용자 UI =====
+        function populateUserSelect() {
+            const select = document.getElementById('userSelect');
+            const data = loadData();
+            const users = Object.keys(data.users);
+
+            select.innerHTML = '';
+
+            if (users.length === 0) {
+                // 기본 사용자 생성
+                addUser('Player 1');
+                return populateUserSelect();
+            }
+
+            users.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
+
+            // 마지막 사용자 선택
+            if (data.lastUser && users.includes(data.lastUser)) {
+                select.value = data.lastUser;
+            }
+
+            currentUser = select.value;
+            updateBestScoreDisplay();
+        }
+
+        function onUserChange() {
+            currentUser = document.getElementById('userSelect').value;
+            const data = loadData();
+            data.lastUser = currentUser;
+            saveData(data);
+            updateBestScoreDisplay();
+            renderScoreboard();
+        }
+
+        function onAddUser() {
+            const name = prompt('새 사용자 이름을 입력하세요:');
+            if (!name || !name.trim()) return;
+            const trimmed = name.trim();
+            if (!addUser(trimmed)) {
+                alert('이미 존재하는 이름입니다.');
+                return;
+            }
+            populateUserSelect();
+            document.getElementById('userSelect').value = trimmed;
+            onUserChange();
+            renderScoreboard();
+        }
+
+        function onDelUser() {
+            if (!currentUser) return;
+            const users = getUserList();
+            if (users.length <= 1) {
+                alert('최소 1명의 사용자가 필요합니다.');
+                return;
+            }
+            if (!confirm(`"${currentUser}" 사용자를 삭제하시겠습니까?\n모든 점수 기록이 삭제됩니다.`)) return;
+            removeUser(currentUser);
+            populateUserSelect();
+            onUserChange();
+            renderScoreboard();
+        }
+
+        // ===== 스코어보드 렌더링 =====
+        function renderScoreboard() {
+            const container = document.getElementById('scoreboardContent');
+            const data = loadData();
+            const users = Object.keys(data.users);
+            const diffs = ['beginner', 'intermediate', 'advanced'];
+
+            let html = '';
+
+            diffs.forEach(diff => {
+                html += `<div class="sb-diff-section">`;
+                html += `<span class="sb-diff-title ${diff}">${diffNames[diff]}</span>`;
+
+                // 해당 난이도 점수가 있는 사용자만 추출, 점수 내림차순 정렬
+                const entries = [];
+                users.forEach(name => {
+                    const s = (data.users[name] && data.users[name][diff]) || 0;
+                    entries.push({ name, score: s });
+                });
+                entries.sort((a, b) => b.score - a.score);
+
+                if (entries.length === 0 || entries.every(e => e.score === 0)) {
+                    html += `<div class="sb-no-scores">아직 기록이 없습니다</div>`;
+                } else {
+                    html += `<table class="sb-table">`;
+                    html += `<tr><th>이름</th><th style="text-align:right">점수</th></tr>`;
+                    entries.forEach(e => {
+                        const isCurrent = e.name === currentUser;
+                        html += `<tr class="${isCurrent ? 'current-user' : ''}">`;
+                        html += `<td>${e.name}</td>`;
+                        html += `<td>${e.score > 0 ? e.score : '-'}</td>`;
+                        html += `</tr>`;
+                    });
+                    html += `</table>`;
+                }
+
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+        }
 
         // ===== 오디오 =====
         let pianoReady = false;
 
         function initAudio() {
             try {
-                // Salamander Grand Piano 샘플
-                // 키 이름에 #을 사용 (Tone.js 표준)
-                // 파일명은 s로 표기 (Ds4.mp3 = D#4)
                 synth = new Tone.Sampler({
                     urls: {
                         'A3':  'A3.mp3',
@@ -454,14 +935,12 @@
                     }
                 }).toDestination();
 
-                // 10초 안에 로드 안 되면 폴백
                 setTimeout(() => {
                     if (!pianoReady) {
                         console.warn('피아노 샘플 로드 타임아웃, 폴백 사용');
                         createFallbackSynth();
                     }
                 }, 10000);
-
             } catch (e) {
                 console.error('Sampler 생성 실패:', e);
                 createFallbackSynth();
@@ -473,12 +952,7 @@
             synth = new Tone.PolySynth(Tone.Synth, {
                 volume: -6,
                 oscillator: { type: 'fatsine', count: 3, spread: 20 },
-                envelope: {
-                    attack: 0.005,
-                    decay: 0.8,
-                    sustain: 0.1,
-                    release: 1.5
-                }
+                envelope: { attack: 0.005, decay: 0.8, sustain: 0.1, release: 1.5 }
             }).toDestination();
             pianoReady = true;
         }
@@ -492,38 +966,88 @@
 
         function playNote(noteName) {
             if (!synth || !audioUnlocked || !pianoReady) return;
+            // 플랫을 샵으로 변환 (Tone.js Sampler는 샵 형식)
+            const playable = toPlayableName(noteName);
             try {
-                synth.triggerAttackRelease(noteName, '4n');
+                synth.triggerAttackRelease(playable, '4n');
             } catch (e) {
-                // 주파수로 폴백
-                const freq = noteFrequencies[noteName];
-                if (freq) {
-                    synth.triggerAttackRelease(freq, '4n');
-                }
+                const freq = noteFrequencies[noteName] || noteFrequencies[playable];
+                if (freq) synth.triggerAttackRelease(freq, '4n');
             }
         }
 
         // ===== 게임 로직 =====
         function getRandomNote() {
-            const notes = Object.keys(noteFrequencies);
-            return notes[Math.floor(Math.random() * notes.length)];
+            const pool = notePools[currentDifficulty] || notePools.beginner;
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        function updateBestScoreDisplay() {
+            if (!currentUser) return;
+            const best = getUserBest(currentUser, currentDifficulty);
+            document.getElementById('bestScore').textContent = best;
         }
 
         function updateScore() {
             document.getElementById('currentScore').textContent = score;
-            const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
-            if (score > bestScore) {
-                localStorage.setItem('bestScore', score.toString());
-                document.getElementById('bestScore').textContent = score;
-            } else {
-                document.getElementById('bestScore').textContent = bestScore;
-            }
+            updateBestScoreDisplay();
+        }
+
+        function clearKeyHighlights() {
+            document.querySelectorAll('.piano-key, .black-key').forEach(btn => {
+                btn.classList.remove('key-correct', 'key-wrong', 'key-show-answer');
+            });
+        }
+
+        function highlightKey(noteLetter, className) {
+            document.querySelectorAll('.piano-key, .black-key').forEach(btn => {
+                if (btn.getAttribute('data-note') === noteLetter) {
+                    btn.classList.add(className);
+                }
+            });
+        }
+
+        // 검은 건반 라벨을 샵 또는 플랫으로 전환
+        function updateBlackKeyLabels(useFlat) {
+            isBlackKeyFlat = useFlat;
+            const blackKeys = document.querySelectorAll('.black-key[data-note]');
+            blackKeys.forEach((btn, idx) => {
+                if (idx < sharpLabels.length) {
+                    const label = useFlat ? flatLabels[idx] : sharpLabels[idx];
+                    btn.setAttribute('data-note', label);
+                    btn.textContent = label;
+                }
+            });
+        }
+
+        // 음표가 플랫인지 확인
+        function isFlat(noteName) {
+            return noteName.includes('b') && !noteName.startsWith('B');
+        }
+
+        // 음표가 샵인지 확인
+        function isSharp(noteName) {
+            return noteName.includes('#');
         }
 
         function showNextNote() {
             if (!gameActive) return;
+            clearKeyHighlights();
             currentNote = getRandomNote();
-            renderStaff(currentNote);
+
+            // 플랫 음표면 검은 건반을 플랫으로, 샵이면 샵으로 전환
+            if (isFlat(currentNote)) {
+                updateBlackKeyLabels(true);
+            } else if (isSharp(currentNote)) {
+                updateBlackKeyLabels(false);
+            }
+            // 자연음이면 이전 상태 유지
+
+            try {
+                renderStaff(currentNote, null, null);
+            } catch (e) {
+                console.error('renderStaff 오류:', e);
+            }
 
             setTimeout(() => {
                 if (gameActive && audioUnlocked) {
@@ -532,35 +1056,47 @@
             }, 100);
         }
 
+        // Tone.js용 음표 이름 변환 (플랫→샵)
+        function toPlayableName(noteName) {
+            const letter = noteName.replace(/[0-9]/g, '');
+            const octave = noteName.replace(/[^0-9]/g, '');
+            if (flatToSharp[letter]) {
+                return flatToSharp[letter] + octave;
+            }
+            return noteName;
+        }
+
         function checkAnswer(selectedNote) {
             if (!gameActive || !currentNote) return;
 
             const currentOctave = parseInt(currentNote.replace(/[^0-9]/g, '')) || 4;
-            const correctNote = currentNote.replace(/[0-9]/g, '').toUpperCase().trim();
-            const userNote = selectedNote.toUpperCase().trim();
-            const isCorrect = userNote === correctNote;
+            // 정답: 옥타브 제거한 음이름 (C, D, C#, Db 등)
+            const correctNote = currentNote.replace(/[0-9]/g, '').trim();
+            const userNote = selectedNote.trim();
+            const isCorrect = (userNote === correctNote);
 
-            // 선택한 음표를 같은 옥타브로 재생
-            const noteToPlay = userNote + currentOctave;
+            // 재생용: 플랫을 샵으로 변환 (Tone.js 호환)
+            const noteToPlay = toPlayableName(userNote + currentOctave);
             playNote(noteToPlay);
 
-            const container = document.getElementById('staffContainer');
+            clearKeyHighlights();
 
             if (isCorrect) {
                 score++;
                 updateScore();
-                container.classList.remove('flash-red');
-                container.classList.add('flash-green');
-                setTimeout(() => container.classList.remove('flash-green'), 300);
+                addToHistory(currentNote, 'blue');
+                renderStaff(currentNote, currentNote, 'blue');
+                highlightKey(userNote, 'key-correct');
             } else {
-                container.classList.remove('flash-green');
-                container.classList.add('flash-red');
-                setTimeout(() => container.classList.remove('flash-red'), 300);
+                addToHistory(currentNote, 'red');
+                renderStaff(currentNote, currentNote, 'red');
+                highlightKey(userNote, 'key-wrong');
+                highlightKey(correctNote, 'key-show-answer');
             }
 
             setTimeout(() => {
                 if (gameActive) showNextNote();
-            }, 400);
+            }, isCorrect ? 400 : 800);
         }
 
         // ===== 타이머 =====
@@ -570,7 +1106,6 @@
             const timerEl = document.getElementById('timer');
             timerEl.textContent = min + ':' + (sec < 10 ? '0' : '') + sec;
 
-            // 10초 이하면 빨간색 깜빡임
             if (timeLeft <= 10) {
                 timerEl.classList.add('timer-warning');
             } else {
@@ -600,26 +1135,26 @@
         function endGame() {
             gameActive = false;
             stopTimer();
-            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = true);
+            disableKeys();
 
-            // 최고점수 확인
-            const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
-            const isNewBest = score > bestScore;
-            if (isNewBest) {
-                localStorage.setItem('bestScore', score.toString());
-                document.getElementById('bestScore').textContent = score;
-            }
+            // 사용자별 최고점수 저장
+            const isNewBest = currentUser ? setUserBest(currentUser, currentDifficulty, score) : false;
+            const bestScoreVal = currentUser ? getUserBest(currentUser, currentDifficulty) : 0;
 
-            // 게임 종료 화면 표시
+            // 스코어보드 갱신
+            renderScoreboard();
+            updateBestScoreDisplay();
+
+            // 게임 종료 화면
             const overlay = document.createElement('div');
             overlay.className = 'game-over-overlay';
             overlay.id = 'gameOverOverlay';
             overlay.innerHTML = `
                 <div class="game-over-box">
                     <h2>⏰ 시간 종료!</h2>
-                    <div>1분 동안의 결과</div>
+                    <div>${currentUser || '?'} (${diffNames[currentDifficulty]})</div>
                     <div class="final-score">${score}점</div>
-                    ${isNewBest ? '<div class="new-best">🎉 새로운 최고점수!</div>' : '<div>최고점수: ' + bestScore + '점</div>'}
+                    ${isNewBest ? '<div class="new-best">🎉 새로운 최고점수!</div>' : '<div>최고점수: ' + bestScoreVal + '점</div>'}
                     <button class="btn" onclick="closeGameOver()">다시 하기</button>
                 </div>
             `;
@@ -632,13 +1167,45 @@
             restartGame();
         }
 
+        function enableKeys() {
+            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = false);
+            const blackKeys = document.querySelectorAll('.black-key');
+            const useBlack = (currentDifficulty === 'intermediate' || currentDifficulty === 'advanced');
+            blackKeys.forEach(btn => {
+                if (useBlack) {
+                    btn.disabled = false;
+                    btn.classList.add('active-black');
+                } else {
+                    btn.disabled = true;
+                    btn.classList.remove('active-black');
+                }
+            });
+        }
+
+        function disableKeys() {
+            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = true);
+            document.querySelectorAll('.black-key').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('active-black');
+            });
+        }
+
         function startGame() {
+            if (!currentUser) {
+                alert('사용자를 선택해주세요.');
+                return;
+            }
             gameActive = true;
             score = 0;
             updateScore();
+            clearNoteHistory();
             document.getElementById('startBtn').disabled = true;
             document.getElementById('restartBtn').disabled = false;
-            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = false);
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = true);
+            document.getElementById('userSelect').disabled = true;
+            document.getElementById('addUserBtn').disabled = true;
+            document.getElementById('delUserBtn').disabled = true;
+            enableKeys();
             startTimer();
             showNextNote();
         }
@@ -650,14 +1217,35 @@
             timeLeft = GAME_TIME;
             updateTimerDisplay();
             updateScore();
+            clearKeyHighlights();
             document.getElementById('startBtn').disabled = false;
             document.getElementById('restartBtn').disabled = true;
             document.getElementById('timer').classList.remove('timer-warning');
-            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = true);
+            const overlay = document.getElementById('gameOverOverlay');
+            if (overlay) overlay.remove();
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = false);
+            document.getElementById('userSelect').disabled = false;
+            document.getElementById('addUserBtn').disabled = false;
+            document.getElementById('delUserBtn').disabled = false;
+            disableKeys();
+            updateBlackKeyLabels(false); // 건반을 샵 표기로 리셋
+            clearNoteHistory();
             initStaff();
         }
 
         // ===== 이벤트 리스너 =====
+
+        // 난이도 선택
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (gameActive) return;
+                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentDifficulty = btn.getAttribute('data-diff');
+                updateBestScoreDisplay();
+            });
+        });
+
         document.getElementById('startBtn').addEventListener('click', () => {
             unlockAudio();
             startGame();
@@ -665,7 +1253,21 @@
 
         document.getElementById('restartBtn').addEventListener('click', restartGame);
 
+        document.getElementById('userSelect').addEventListener('change', onUserChange);
+        document.getElementById('addUserBtn').addEventListener('click', onAddUser);
+        document.getElementById('delUserBtn').addEventListener('click', onDelUser);
+
+        // 흰 건반 클릭
         document.querySelectorAll('.piano-key').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!gameActive) return;
+                unlockAudio();
+                checkAnswer(btn.getAttribute('data-note'));
+            });
+        });
+
+        // 검은 건반 클릭
+        document.querySelectorAll('.black-key').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!gameActive) return;
                 unlockAudio();
@@ -682,17 +1284,14 @@
         // ===== 초기화 =====
         function initializePage() {
             initAudio();
+            populateUserSelect();
             updateScore();
-            const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
-            if (bestScore > 0) {
-                document.getElementById('bestScore').textContent = bestScore;
-            }
-            // staff.js의 initStaff 호출
+            renderScoreboard();
             initStaff();
             document.getElementById('loadingMsg').style.display = 'none';
         }
 
-        // VexFlow 동적 로딩 (여러 CDN 시도)
+        // VexFlow 동적 로딩
         const vexFlowCDNs = [
             'https://cdn.jsdelivr.net/npm/vexflow@4.2.6/build/cjs/vexflow.js',
             'https://unpkg.com/vexflow@4.2.6/build/cjs/vexflow.js',
@@ -713,7 +1312,6 @@
             script.src = vexFlowCDNs[index];
             script.onload = function() {
                 console.log('VexFlow 로드 성공:', vexFlowCDNs[index]);
-                // VexFlow 4.x는 전역변수 VexFlow 사용
                 if (typeof VexFlow !== 'undefined' && typeof Vex === 'undefined') {
                     window.Vex = { Flow: VexFlow };
                 }

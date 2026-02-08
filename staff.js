@@ -1,33 +1,50 @@
 // ===== staff.js =====
 // VexFlow를 사용한 악보 오선지 렌더링
 
-// VexFlow 음표 형식 변환 맵 (과학적 음표 표기 -> VexFlow 키)
+// VexFlow 음표 형식 변환 맵 (자연음 + 샵/플랫)
 const vexFlowNotes = {
+    // 자연음
     'C4': 'c/4', 'D4': 'd/4', 'E4': 'e/4', 'F4': 'f/4',
     'G4': 'g/4', 'A4': 'a/4', 'B4': 'b/4',
     'C5': 'c/5', 'D5': 'd/5', 'E5': 'e/5', 'F5': 'f/5',
-    'G5': 'g/5', 'A5': 'a/5', 'B5': 'b/5'
+    'G5': 'g/5', 'A5': 'a/5', 'B5': 'b/5',
+    // 샵
+    'C#4': 'c#/4', 'D#4': 'd#/4', 'F#4': 'f#/4', 'G#4': 'g#/4', 'A#4': 'a#/4',
+    'C#5': 'c#/5', 'D#5': 'd#/5', 'F#5': 'f#/5', 'G#5': 'g#/5', 'A#5': 'a#/5',
+    // 플랫
+    'Db4': 'db/4', 'Eb4': 'eb/4', 'Gb4': 'gb/4', 'Ab4': 'ab/4', 'Bb4': 'bb/4',
+    'Db5': 'db/5', 'Eb5': 'eb/5', 'Gb5': 'gb/5', 'Ab5': 'ab/5', 'Bb5': 'bb/5'
 };
 
-// 줄기 방향 결정
-// 규칙: 가운데 줄(B4) 기준
-//   - B4 이하 (C4~B4): 줄기 위로 (stem up) = 1
-//   - B4 위 (C5~B5): 줄기 아래로 (stem down) = -1
-const stemDirections = {
-    'C4': 1, 'D4': 1, 'E4': 1, 'F4': 1,
-    'G4': 1, 'A4': 1, 'B4': 1,
-    'C5': -1, 'D5': -1, 'E5': -1, 'F5': -1,
-    'G5': -1, 'A5': -1, 'B5': -1
+// 임시표(accidental) 정보
+const noteAccidentals = {
+    'C#4': '#', 'D#4': '#', 'F#4': '#', 'G#4': '#', 'A#4': '#',
+    'C#5': '#', 'D#5': '#', 'F#5': '#', 'G#5': '#', 'A#5': '#',
+    'Db4': 'b', 'Eb4': 'b', 'Gb4': 'b', 'Ab4': 'b', 'Bb4': 'b',
+    'Db5': 'b', 'Eb5': 'b', 'Gb5': 'b', 'Ab5': 'b', 'Bb5': 'b'
 };
 
-// VexFlow API 참조 가져오기
+// 음표 표시 이름 (옥타브 제외)
+function getDisplayName(noteName) {
+    return noteName.replace(/[0-9]/g, '');
+}
+
+// 줄기 방향 결정 (B4 기준)
+function getStemDirection(noteName) {
+    const octave = parseInt(noteName.replace(/[^0-9]/g, '')) || 4;
+    if (octave >= 5) return -1;
+    if (octave <= 3) return 1;
+    return 1; // 옥타브 4: 위로
+}
+
+// 이전 음 히스토리 (최대 2개)
+const MAX_HISTORY = 2;
+let noteHistory = [];
+
+// VexFlow API 참조
 function getVF() {
-    if (typeof Vex !== 'undefined' && Vex.Flow) {
-        return Vex.Flow;
-    }
-    if (typeof VexFlow !== 'undefined') {
-        return VexFlow;
-    }
+    if (typeof Vex !== 'undefined' && Vex.Flow) return Vex.Flow;
+    if (typeof VexFlow !== 'undefined') return VexFlow;
     return null;
 }
 
@@ -39,21 +56,74 @@ function getStaffDimensions() {
     return { width: width, height: 200 };
 }
 
-// 빈 오선지 그리기 (초기 상태)
+// 히스토리 초기화
+function clearNoteHistory() {
+    noteHistory = [];
+}
+
+// 히스토리에 음 추가
+function addToHistory(noteName, color) {
+    noteHistory.push({ note: noteName, color: color });
+    if (noteHistory.length > MAX_HISTORY) {
+        noteHistory.shift();
+    }
+}
+
+// VexFlow StaveNote 생성 헬퍼
+function createStaveNote(VF, noteName, stemDir, showLabel) {
+    const vexKey = vexFlowNotes[noteName];
+    if (!vexKey) return null;
+
+    const note = new VF.StaveNote({
+        clef: 'treble',
+        keys: [vexKey],
+        duration: 'q',
+        stem_direction: stemDir
+    });
+
+    // 임시표(샵/플랫) 추가
+    try {
+        const acc = noteAccidentals[noteName];
+        if (acc && VF.Accidental) {
+            note.addModifier(new VF.Accidental(acc), 0);
+        }
+    } catch (e) {
+        console.warn('Accidental 추가 실패:', e);
+    }
+
+    // 음이름 라벨 추가
+    if (showLabel) {
+        try {
+            const label = getDisplayName(noteName);
+            const annotation = new VF.Annotation(label);
+            annotation.setFont('Arial', 11, 'bold');
+            // 줄기가 위로 가면 라벨은 아래에, 줄기가 아래로 가면 라벨도 아래에
+            if (VF.Annotation.VerticalJustify) {
+                annotation.setVerticalJustification(VF.Annotation.VerticalJustify.BOTTOM);
+            } else {
+                annotation.setVerticalJustification(4); // BOTTOM fallback
+            }
+            note.addModifier(annotation, 0);
+        } catch (e) {
+            console.warn('Annotation 추가 실패:', e);
+        }
+    }
+
+    return note;
+}
+
+// 빈 오선지 그리기
 function initStaff() {
     const VF = getVF();
-    if (!VF) {
-        console.error('VexFlow를 찾을 수 없습니다');
-        return;
-    }
+    if (!VF) return;
 
     const staffDiv = document.getElementById('staffDiv');
     if (!staffDiv) return;
 
     staffDiv.innerHTML = '';
+    clearNoteHistory();
 
     const dim = getStaffDimensions();
-
     const renderer = new VF.Renderer(staffDiv, VF.Renderer.Backends.SVG);
     renderer.resize(dim.width, dim.height);
     const context = renderer.getContext();
@@ -64,8 +134,8 @@ function initStaff() {
     stave.setContext(context).draw();
 }
 
-// 음표가 포함된 오선지 그리기
-function renderStaff(noteName) {
+// 히스토리 + 현재 음표 렌더링
+function renderStaff(currentNote, feedbackNote, feedbackColor) {
     const VF = getVF();
     if (!VF) {
         console.error('VexFlow를 찾을 수 없습니다');
@@ -74,11 +144,9 @@ function renderStaff(noteName) {
 
     const staffDiv = document.getElementById('staffDiv');
     if (!staffDiv) return;
-
     staffDiv.innerHTML = '';
 
     const dim = getStaffDimensions();
-
     const renderer = new VF.Renderer(staffDiv, VF.Renderer.Backends.SVG);
     renderer.resize(dim.width, dim.height);
     const context = renderer.getContext();
@@ -88,28 +156,66 @@ function renderStaff(noteName) {
     stave.addClef('treble');
     stave.setContext(context).draw();
 
-    if (noteName && vexFlowNotes[noteName]) {
-        // 줄기 방향 설정
-        const stemDir = stemDirections[noteName] || 1;
+    try {
+        const tickables = [];
+        const totalSlots = MAX_HISTORY + 2; // 히스토리 + 현재 + 여백
+        const usedSlots = noteHistory.length + 1;
 
-        const note = new VF.StaveNote({
-            clef: 'treble',
-            keys: [vexFlowNotes[noteName]],
-            duration: 'q',
-            stem_direction: stemDir
+        // 앞에 빈칸 채우기
+        const emptySlots = Math.max(0, totalSlots - usedSlots - 1);
+        for (let i = 0; i < emptySlots; i++) {
+            tickables.push(new VF.GhostNote({ duration: 'q' }));
+        }
+
+        // 히스토리 음표 (왼쪽, 점점 흐려짐)
+        noteHistory.forEach((item, idx) => {
+            const stemDir = getStemDirection(item.note);
+            const histNote = createStaveNote(VF, item.note, stemDir, true);
+            if (!histNote) return;
+
+            const opacity = 0.3 + (idx / Math.max(noteHistory.length, 1)) * 0.4;
+            const colorMap = { 'blue': '#2196F3', 'red': '#F44336' };
+            const baseColor = colorMap[item.color] || '#999';
+            const alpha = Math.round(opacity * 255).toString(16).padStart(2, '0');
+            const fadedColor = baseColor + alpha;
+
+            histNote.setStyle({ fillStyle: fadedColor, strokeStyle: fadedColor });
+            tickables.push(histNote);
         });
 
-        // 보이지 않는 쉼표를 앞에 추가하여 음표를 중앙에 배치
-        const ghostBefore = new VF.GhostNote({ duration: 'h' });
-        const ghostAfter = new VF.GhostNote({ duration: 'q' });
+        // 현재 음표 (맨 오른쪽)
+        if (currentNote && vexFlowNotes[currentNote]) {
+            const stemDir = getStemDirection(currentNote);
+            // 피드백 있으면 음이름 표시, 없으면 숨김
+            const showLabel = !!feedbackColor;
+            const mainNote = createStaveNote(VF, currentNote, stemDir, showLabel);
 
-        const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
-        voice.setStrict(false);
-        voice.addTickables([ghostBefore, note, ghostAfter]);
+            if (mainNote) {
+                if (feedbackColor) {
+                    const colorMap = { 'blue': '#2196F3', 'red': '#F44336' };
+                    const c = colorMap[feedbackColor] || '#333';
+                    mainNote.setStyle({ fillStyle: c, strokeStyle: c });
+                }
+                tickables.push(mainNote);
+            }
+        }
 
-        new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 80);
+        // 뒤에 여백
+        tickables.push(new VF.GhostNote({ duration: 'q' }));
 
-        voice.draw(context, stave);
+        if (tickables.length > 0) {
+            const voice = new VF.Voice({
+                num_beats: tickables.length,
+                beat_value: 4
+            });
+            voice.setStrict(false);
+            voice.addTickables(tickables);
+
+            new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 80);
+            voice.draw(context, stave);
+        }
+    } catch (e) {
+        console.error('renderStaff 오류:', e);
     }
 
     const errorDiv = document.getElementById('errorMsg');
