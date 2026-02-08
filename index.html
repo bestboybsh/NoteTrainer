@@ -109,40 +109,93 @@
             transform: none;
         }
 
-        .note-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
+        .piano-container {
             margin-top: 30px;
+            display: flex;
+            justify-content: center;
         }
 
-        .note-btn {
-            padding: 20px 30px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border: 3px solid #2196F3;
-            border-radius: 12px;
-            background: white;
-            color: #2196F3;
+        .piano {
+            display: flex;
+            position: relative;
+            height: 200px;
+            user-select: none;
+        }
+
+        /* 흰 건반 래퍼 (검은건반 위치 기준) */
+        .white-key-wrapper {
+            position: relative;
+            width: 64px;
+            height: 200px;
+        }
+
+        /* 흰 건반 */
+        .piano-key {
+            position: relative;
+            width: 64px;
+            height: 200px;
+            background: linear-gradient(to bottom, #f8f8f8, #fff 10%, #fff 85%, #e0e0e0);
+            border: 1px solid #999;
+            border-radius: 0 0 6px 6px;
             cursor: pointer;
-            transition: all 0.2s;
-            min-width: 80px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 14px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #555;
+            transition: all 0.08s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15), inset 0 -2px 3px rgba(0,0,0,0.05);
+            z-index: 1;
+            margin-left: -1px;
         }
 
-        .note-btn:hover {
-            background: #E3F2FD;
-            transform: scale(1.05);
+        .white-key-wrapper:first-child .piano-key {
+            margin-left: 0;
         }
 
-        .note-btn:active {
-            transform: scale(0.95);
+        .piano-key:hover {
+            background: linear-gradient(to bottom, #eef5ff, #e3f0ff 10%, #e3f0ff 85%, #d0e4ff);
         }
 
-        .note-btn:disabled {
+        .piano-key:active,
+        .piano-key.key-pressed {
+            background: linear-gradient(to bottom, #ddd, #eee);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 1px rgba(0,0,0,0.05);
+            transform: translateY(2px);
+            height: 198px;
+        }
+
+        .piano-key:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            background: linear-gradient(to bottom, #eee, #e5e5e5);
+        }
+
+        .piano-key:disabled:hover {
+            background: linear-gradient(to bottom, #eee, #e5e5e5);
+        }
+
+        .piano-key:disabled:active {
             transform: none;
+            height: 200px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15), inset 0 -2px 3px rgba(0,0,0,0.05);
+        }
+
+        /* 검은 건반 */
+        .black-key {
+            position: absolute;
+            top: 0;
+            right: -20px;
+            width: 38px;
+            height: 120px;
+            background: linear-gradient(to bottom, #333, #1a1a1a 40%, #111 90%, #000);
+            border: 1px solid #000;
+            border-radius: 0 0 4px 4px;
+            z-index: 2;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 -2px 4px rgba(255,255,255,0.05);
+            pointer-events: none;
         }
 
         .flash-green {
@@ -175,6 +228,63 @@
             padding: 10px;
         }
 
+        .timer-warning {
+            color: #F44336 !important;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.4; }
+        }
+
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .game-over-box {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .game-over-box h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .game-over-box .final-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2196F3;
+            margin: 15px 0;
+        }
+
+        .game-over-box .new-best {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .game-over-box .btn {
+            margin-top: 20px;
+        }
+
         @media (max-width: 600px) {
             h1 {
                 font-size: 2rem;
@@ -189,10 +299,31 @@
                 font-size: 1.5rem;
             }
 
-            .note-btn {
-                padding: 15px 20px;
-                font-size: 1.3rem;
-                min-width: 70px;
+            .white-key-wrapper {
+                width: 48px;
+                height: 160px;
+            }
+
+            .piano {
+                height: 160px;
+            }
+
+            .piano-key {
+                width: 48px;
+                height: 160px;
+                font-size: 1.1rem;
+                padding-bottom: 10px;
+            }
+
+            .piano-key:active,
+            .piano-key.key-pressed {
+                height: 158px;
+            }
+
+            .black-key {
+                width: 30px;
+                height: 95px;
+                right: -16px;
             }
 
             .btn {
@@ -215,6 +346,10 @@
                 <span>Best</span>
                 <span class="score-value" id="bestScore">0</span>
             </div>
+            <div class="score-item">
+                <span>Time</span>
+                <span class="score-value" id="timer">1:00</span>
+            </div>
         </div>
 
         <div class="controls">
@@ -228,14 +363,35 @@
             <div id="errorMsg" style="display: none;"></div>
         </div>
 
-        <div class="note-buttons" id="noteButtons">
-            <button class="note-btn" data-note="C" disabled>C</button>
-            <button class="note-btn" data-note="D" disabled>D</button>
-            <button class="note-btn" data-note="E" disabled>E</button>
-            <button class="note-btn" data-note="F" disabled>F</button>
-            <button class="note-btn" data-note="G" disabled>G</button>
-            <button class="note-btn" data-note="A" disabled>A</button>
-            <button class="note-btn" data-note="B" disabled>B</button>
+        <div class="piano-container">
+            <div class="piano" id="noteButtons">
+                <div class="white-key-wrapper">
+                    <button class="piano-key" data-note="C" disabled>C</button>
+                    <div class="black-key"></div>
+                </div>
+                <div class="white-key-wrapper">
+                    <button class="piano-key" data-note="D" disabled>D</button>
+                    <div class="black-key"></div>
+                </div>
+                <div class="white-key-wrapper">
+                    <button class="piano-key" data-note="E" disabled>E</button>
+                </div>
+                <div class="white-key-wrapper">
+                    <button class="piano-key" data-note="F" disabled>F</button>
+                    <div class="black-key"></div>
+                </div>
+                <div class="white-key-wrapper">
+                    <button class="piano-key" data-note="G" disabled>G</button>
+                    <div class="black-key"></div>
+                </div>
+                <div class="white-key-wrapper">
+                    <button class="piano-key" data-note="A" disabled>A</button>
+                    <div class="black-key"></div>
+                </div>
+                <div class="white-key-wrapper">
+                    <button class="piano-key" data-note="B" disabled>B</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -253,6 +409,9 @@
         let score = 0;
         let gameActive = false;
         let audioUnlocked = false;
+        let timerInterval = null;
+        let timeLeft = 60; // 1분
+        const GAME_TIME = 60;
 
         // 음표별 주파수
         const noteFrequencies = {
@@ -404,23 +563,97 @@
             }, 400);
         }
 
+        // ===== 타이머 =====
+        function updateTimerDisplay() {
+            const min = Math.floor(timeLeft / 60);
+            const sec = timeLeft % 60;
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = min + ':' + (sec < 10 ? '0' : '') + sec;
+
+            // 10초 이하면 빨간색 깜빡임
+            if (timeLeft <= 10) {
+                timerEl.classList.add('timer-warning');
+            } else {
+                timerEl.classList.remove('timer-warning');
+            }
+        }
+
+        function startTimer() {
+            timeLeft = GAME_TIME;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function endGame() {
+            gameActive = false;
+            stopTimer();
+            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = true);
+
+            // 최고점수 확인
+            const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
+            const isNewBest = score > bestScore;
+            if (isNewBest) {
+                localStorage.setItem('bestScore', score.toString());
+                document.getElementById('bestScore').textContent = score;
+            }
+
+            // 게임 종료 화면 표시
+            const overlay = document.createElement('div');
+            overlay.className = 'game-over-overlay';
+            overlay.id = 'gameOverOverlay';
+            overlay.innerHTML = `
+                <div class="game-over-box">
+                    <h2>⏰ 시간 종료!</h2>
+                    <div>1분 동안의 결과</div>
+                    <div class="final-score">${score}점</div>
+                    ${isNewBest ? '<div class="new-best">🎉 새로운 최고점수!</div>' : '<div>최고점수: ' + bestScore + '점</div>'}
+                    <button class="btn" onclick="closeGameOver()">다시 하기</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function closeGameOver() {
+            const overlay = document.getElementById('gameOverOverlay');
+            if (overlay) overlay.remove();
+            restartGame();
+        }
+
         function startGame() {
             gameActive = true;
             score = 0;
             updateScore();
             document.getElementById('startBtn').disabled = true;
             document.getElementById('restartBtn').disabled = false;
-            document.querySelectorAll('.note-btn').forEach(btn => btn.disabled = false);
+            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = false);
+            startTimer();
             showNextNote();
         }
 
         function restartGame() {
             gameActive = false;
+            stopTimer();
             score = 0;
+            timeLeft = GAME_TIME;
+            updateTimerDisplay();
             updateScore();
             document.getElementById('startBtn').disabled = false;
             document.getElementById('restartBtn').disabled = true;
-            document.querySelectorAll('.note-btn').forEach(btn => btn.disabled = true);
+            document.getElementById('timer').classList.remove('timer-warning');
+            document.querySelectorAll('.piano-key').forEach(btn => btn.disabled = true);
             initStaff();
         }
 
@@ -432,7 +665,7 @@
 
         document.getElementById('restartBtn').addEventListener('click', restartGame);
 
-        document.querySelectorAll('.note-btn').forEach(btn => {
+        document.querySelectorAll('.piano-key').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (!gameActive) return;
                 unlockAudio();
