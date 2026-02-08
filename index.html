@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Sight-Reading Trainer</title>
-    <script src="https://unpkg.com/vexflow@3.0.9/build/vexflow.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         * {
             margin: 0;
@@ -73,7 +71,10 @@
 
         #staffCanvas {
             max-width: 100%;
-            height: auto;
+            width: 600px;
+            height: 200px;
+            display: block;
+            background: white;
         }
 
         .controls {
@@ -144,22 +145,34 @@
             transform: none;
         }
 
-        .flash {
-            animation: flash 0.3s ease-in-out;
-        }
-
-        @keyframes flash {
-            0% { background-color: transparent; }
-            50% { background-color: var(--flash-color); }
-            100% { background-color: transparent; }
-        }
-
         .flash-green {
-            --flash-color: #4CAF50;
+            animation: flashGreen 0.3s ease-in-out;
         }
 
         .flash-red {
-            --flash-color: #F44336;
+            animation: flashRed 0.3s ease-in-out;
+        }
+
+        @keyframes flashGreen {
+            0% { background-color: white; }
+            50% { background-color: #4CAF50; }
+            100% { background-color: white; }
+        }
+
+        @keyframes flashRed {
+            0% { background-color: white; }
+            50% { background-color: #F44336; }
+            100% { background-color: white; }
+        }
+
+        #loadingMsg {
+            color: #999;
+            font-size: 1rem;
+        }
+
+        #errorMsg {
+            color: red;
+            padding: 10px;
         }
 
         @media (max-width: 600px) {
@@ -210,35 +223,38 @@
         </div>
 
         <div class="staff-container" id="staffContainer">
-            <canvas id="staffCanvas"></canvas>
+            <div id="staffDiv"></div>
+            <div id="loadingMsg">Loading...</div>
+            <div id="errorMsg" style="display: none;"></div>
         </div>
 
         <div class="note-buttons" id="noteButtons">
-            <button class="note-btn" data-note="C">C</button>
-            <button class="note-btn" data-note="D">D</button>
-            <button class="note-btn" data-note="E">E</button>
-            <button class="note-btn" data-note="F">F</button>
-            <button class="note-btn" data-note="G">G</button>
-            <button class="note-btn" data-note="A">A</button>
-            <button class="note-btn" data-note="B">B</button>
+            <button class="note-btn" data-note="C" disabled>C</button>
+            <button class="note-btn" data-note="D" disabled>D</button>
+            <button class="note-btn" data-note="E" disabled>E</button>
+            <button class="note-btn" data-note="F" disabled>F</button>
+            <button class="note-btn" data-note="G" disabled>G</button>
+            <button class="note-btn" data-note="A" disabled>A</button>
+            <button class="note-btn" data-note="B" disabled>B</button>
         </div>
     </div>
 
-    <script>
-        const { Renderer, Stave, StaveNote, Voice, Formatter, Accidental } = Vex.Flow;
+    <!-- 1. Tone.js 로드 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
-        let synth;
+    <!-- 2. 악보 렌더링 (VexFlow) -->
+    <script src="staff.js"></script>
+
+    <!-- 3. 게임 로직 -->
+    <script>
+        // ===== 상태 변수 =====
+        let synth = null;
         let currentNote = null;
         let score = 0;
         let gameActive = false;
         let audioUnlocked = false;
 
-        const noteNames = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-        const notePitches = {
-            'C': 4, 'D': 4, 'E': 4, 'F': 4, 'G': 4, 'A': 4, 'B': 4,
-            'C5': 5, 'D5': 5, 'E5': 5, 'F5': 5, 'G5': 5, 'A5': 5, 'B5': 5
-        };
-
+        // 음표별 주파수
         const noteFrequencies = {
             'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
             'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
@@ -246,25 +262,66 @@
             'G5': 783.99, 'A5': 880.00, 'B5': 987.77
         };
 
-        const vexFlowNotes = {
-            'C4': 'c/4', 'D4': 'd/4', 'E4': 'e/4', 'F4': 'f/4',
-            'G4': 'g/4', 'A4': 'a/4', 'B4': 'b/4',
-            'C5': 'c/5', 'D5': 'd/5', 'E5': 'e/5', 'F5': 'f/5',
-            'G5': 'g/5', 'A5': 'a/5', 'B5': 'b/5'
-        };
+        // ===== 오디오 =====
+        let pianoReady = false;
 
         function initAudio() {
-            synth = new Tone.Synth({
-                oscillator: {
-                    type: 'triangle'
-                },
+            try {
+                // Salamander Grand Piano 샘플
+                // 키 이름에 #을 사용 (Tone.js 표준)
+                // 파일명은 s로 표기 (Ds4.mp3 = D#4)
+                synth = new Tone.Sampler({
+                    urls: {
+                        'A3':  'A3.mp3',
+                        'C4':  'C4.mp3',
+                        'D#4': 'Ds4.mp3',
+                        'F#4': 'Fs4.mp3',
+                        'A4':  'A4.mp3',
+                        'C5':  'C5.mp3',
+                        'D#5': 'Ds5.mp3',
+                        'F#5': 'Fs5.mp3',
+                        'A5':  'A5.mp3',
+                        'C6':  'C6.mp3'
+                    },
+                    baseUrl: 'https://tonejs.github.io/audio/salamander/',
+                    release: 1.5,
+                    onload: () => {
+                        pianoReady = true;
+                        console.log('🎹 피아노 샘플 로드 완료');
+                    },
+                    onerror: (err) => {
+                        console.error('피아노 샘플 로드 에러:', err);
+                        createFallbackSynth();
+                    }
+                }).toDestination();
+
+                // 10초 안에 로드 안 되면 폴백
+                setTimeout(() => {
+                    if (!pianoReady) {
+                        console.warn('피아노 샘플 로드 타임아웃, 폴백 사용');
+                        createFallbackSynth();
+                    }
+                }, 10000);
+
+            } catch (e) {
+                console.error('Sampler 생성 실패:', e);
+                createFallbackSynth();
+            }
+        }
+
+        function createFallbackSynth() {
+            if (pianoReady) return;
+            synth = new Tone.PolySynth(Tone.Synth, {
+                volume: -6,
+                oscillator: { type: 'fatsine', count: 3, spread: 20 },
                 envelope: {
-                    attack: 0.01,
-                    decay: 0.1,
-                    sustain: 0.3,
-                    release: 0.3
+                    attack: 0.005,
+                    decay: 0.8,
+                    sustain: 0.1,
+                    release: 1.5
                 }
             }).toDestination();
+            pianoReady = true;
         }
 
         function unlockAudio() {
@@ -275,67 +332,22 @@
         }
 
         function playNote(noteName) {
-            if (!synth || !audioUnlocked) return;
-            const freq = noteFrequencies[noteName];
-            if (freq) {
-                synth.triggerAttackRelease(freq, '8n');
+            if (!synth || !audioUnlocked || !pianoReady) return;
+            try {
+                synth.triggerAttackRelease(noteName, '4n');
+            } catch (e) {
+                // 주파수로 폴백
+                const freq = noteFrequencies[noteName];
+                if (freq) {
+                    synth.triggerAttackRelease(freq, '4n');
+                }
             }
         }
 
+        // ===== 게임 로직 =====
         function getRandomNote() {
-            const notes = Object.keys(vexFlowNotes);
+            const notes = Object.keys(noteFrequencies);
             return notes[Math.floor(Math.random() * notes.length)];
-        }
-
-        function renderStaff(noteName) {
-            const canvas = document.getElementById('staffCanvas');
-            const container = document.getElementById('staffContainer');
-            
-            const containerWidth = container.clientWidth || 600;
-            canvas.width = Math.min(600, containerWidth - 40);
-            canvas.height = 200;
-
-            const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
-            const ctx = renderer.getContext();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.setFont('Arial', 10);
-
-            const stave = new Stave(50, 40, canvas.width - 100);
-            stave.addClef('treble');
-            stave.setContext(ctx).draw();
-
-            if (noteName) {
-                const note = new StaveNote({
-                    clef: 'treble',
-                    keys: [vexFlowNotes[noteName]],
-                    duration: 'q'
-                });
-
-                const voice = new Voice({ num_beats: 1, beat_value: 4 });
-                voice.addTickables([note]);
-
-                new Formatter().joinVoices([voice]).format([voice], canvas.width - 150);
-
-                voice.draw(ctx, stave);
-            }
-        }
-
-        function initStaff() {
-            const canvas = document.getElementById('staffCanvas');
-            const container = document.getElementById('staffContainer');
-            
-            const containerWidth = container.clientWidth || 600;
-            canvas.width = Math.min(600, containerWidth - 40);
-            canvas.height = 200;
-
-            const renderer = new Renderer(canvas, Renderer.Backends.CANVAS);
-            const ctx = renderer.getContext();
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.setFont('Arial', 10);
-
-            const stave = new Stave(50, 40, canvas.width - 100);
-            stave.addClef('treble');
-            stave.setContext(ctx).draw();
         }
 
         function updateScore() {
@@ -351,7 +363,6 @@
 
         function showNextNote() {
             if (!gameActive) return;
-
             currentNote = getRandomNote();
             renderStaff(currentNote);
 
@@ -365,29 +376,31 @@
         function checkAnswer(selectedNote) {
             if (!gameActive || !currentNote) return;
 
-            const correctNote = currentNote.replace(/[0-9]/g, '');
-            const isCorrect = selectedNote === correctNote;
+            const currentOctave = parseInt(currentNote.replace(/[^0-9]/g, '')) || 4;
+            const correctNote = currentNote.replace(/[0-9]/g, '').toUpperCase().trim();
+            const userNote = selectedNote.toUpperCase().trim();
+            const isCorrect = userNote === correctNote;
 
-            playNote(selectedNote + (currentNote.includes('5') ? '5' : '4'));
+            // 선택한 음표를 같은 옥타브로 재생
+            const noteToPlay = userNote + currentOctave;
+            playNote(noteToPlay);
+
+            const container = document.getElementById('staffContainer');
 
             if (isCorrect) {
                 score++;
                 updateScore();
-                document.getElementById('staffContainer').classList.add('flash', 'flash-green');
-                setTimeout(() => {
-                    document.getElementById('staffContainer').classList.remove('flash', 'flash-green');
-                }, 300);
+                container.classList.remove('flash-red');
+                container.classList.add('flash-green');
+                setTimeout(() => container.classList.remove('flash-green'), 300);
             } else {
-                document.getElementById('staffContainer').classList.add('flash', 'flash-red');
-                setTimeout(() => {
-                    document.getElementById('staffContainer').classList.remove('flash', 'flash-red');
-                }, 300);
+                container.classList.remove('flash-green');
+                container.classList.add('flash-red');
+                setTimeout(() => container.classList.remove('flash-red'), 300);
             }
 
             setTimeout(() => {
-                if (gameActive) {
-                    showNextNote();
-                }
+                if (gameActive) showNextNote();
             }, 400);
         }
 
@@ -397,10 +410,7 @@
             updateScore();
             document.getElementById('startBtn').disabled = true;
             document.getElementById('restartBtn').disabled = false;
-            
-            const noteBtns = document.querySelectorAll('.note-btn');
-            noteBtns.forEach(btn => btn.disabled = false);
-
+            document.querySelectorAll('.note-btn').forEach(btn => btn.disabled = false);
             showNextNote();
         }
 
@@ -410,15 +420,11 @@
             updateScore();
             document.getElementById('startBtn').disabled = false;
             document.getElementById('restartBtn').disabled = true;
-            
-            const noteBtns = document.querySelectorAll('.note-btn');
-            noteBtns.forEach(btn => btn.disabled = true);
-
-            const canvas = document.getElementById('staffCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.querySelectorAll('.note-btn').forEach(btn => btn.disabled = true);
+            initStaff();
         }
 
+        // ===== 이벤트 리스너 =====
         document.getElementById('startBtn').addEventListener('click', () => {
             unlockAudio();
             startGame();
@@ -430,37 +436,64 @@
             btn.addEventListener('click', () => {
                 if (!gameActive) return;
                 unlockAudio();
-                const selectedNote = btn.getAttribute('data-note');
-                checkAnswer(selectedNote);
+                checkAnswer(btn.getAttribute('data-note'));
             });
         });
 
         document.addEventListener('click', unlockAudio, { once: true });
 
-        function initializePage() {
-            initStaff();
-            initAudio();
-            updateScore();
-        }
-
-        if (document.readyState === 'loading') {
-            window.addEventListener('load', () => {
-                setTimeout(initializePage, 100);
-            });
-        } else {
-            setTimeout(initializePage, 100);
-        }
-
         window.addEventListener('resize', () => {
-            if (!gameActive) {
-                initStaff();
-            }
+            if (!gameActive) initStaff();
         });
 
-        const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
-        if (bestScore > 0) {
-            document.getElementById('bestScore').textContent = bestScore;
+        // ===== 초기화 =====
+        function initializePage() {
+            initAudio();
+            updateScore();
+            const bestScore = parseInt(localStorage.getItem('bestScore') || '0');
+            if (bestScore > 0) {
+                document.getElementById('bestScore').textContent = bestScore;
+            }
+            // staff.js의 initStaff 호출
+            initStaff();
+            document.getElementById('loadingMsg').style.display = 'none';
         }
+
+        // VexFlow 동적 로딩 (여러 CDN 시도)
+        const vexFlowCDNs = [
+            'https://cdn.jsdelivr.net/npm/vexflow@4.2.6/build/cjs/vexflow.js',
+            'https://unpkg.com/vexflow@4.2.6/build/cjs/vexflow.js',
+            'https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js',
+            'https://cdn.jsdelivr.net/npm/vexflow@3.0.9/releases/vexflow-min.js',
+            'https://unpkg.com/vexflow@3.0.9/releases/vexflow-min.js'
+        ];
+
+        function loadVexFlowFromCDN(index) {
+            if (index >= vexFlowCDNs.length) {
+                document.getElementById('loadingMsg').style.display = 'none';
+                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('errorMsg').textContent = 'VexFlow 라이브러리를 로드할 수 없습니다. 인터넷 연결을 확인 후 새로고침하세요.';
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = vexFlowCDNs[index];
+            script.onload = function() {
+                console.log('VexFlow 로드 성공:', vexFlowCDNs[index]);
+                // VexFlow 4.x는 전역변수 VexFlow 사용
+                if (typeof VexFlow !== 'undefined' && typeof Vex === 'undefined') {
+                    window.Vex = { Flow: VexFlow };
+                }
+                initializePage();
+            };
+            script.onerror = function() {
+                console.warn('VexFlow 로드 실패:', vexFlowCDNs[index]);
+                loadVexFlowFromCDN(index + 1);
+            };
+            document.body.appendChild(script);
+        }
+
+        loadVexFlowFromCDN(0);
     </script>
 </body>
 </html>
