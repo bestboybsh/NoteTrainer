@@ -234,6 +234,7 @@
             margin-top: 20px;
             display: flex;
             justify-content: center;
+            overflow-x: auto;
         }
 
         .piano {
@@ -247,6 +248,22 @@
             position: relative;
             width: 64px;
             height: 200px;
+        }
+
+        /* Middle C 표시 */
+        .piano-key.middle-c {
+            border-bottom: 4px solid #FF9800;
+        }
+        .piano-key.middle-c::after {
+            content: 'M';
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            font-weight: bold;
+            color: #FF9800;
+            opacity: 0.7;
         }
 
         .piano-key {
@@ -379,6 +396,21 @@
             box-shadow: 0 0 0 3px #F44336, 0 4px 6px rgba(0,0,0,0.4) !important;
             color: #F44336 !important;
         }
+
+        /* ===== 컴팩트 키보드 (중급/고급) ===== */
+        .piano.compact { height: 180px; }
+        .piano.compact .white-key-wrapper { width: 40px; height: 180px; }
+        .piano.compact .piano-key {
+            width: 40px; height: 180px;
+            font-size: 0.85rem; padding-bottom: 10px;
+        }
+        .piano.compact .piano-key:active,
+        .piano.compact .piano-key.key-pressed { height: 178px; }
+        .piano.compact .black-key {
+            width: 26px; height: 108px; right: -13px; font-size: 0.55rem;
+        }
+        .piano.compact .black-key.active-black:active { height: 106px; }
+        .piano.compact .piano-key.middle-c::after { font-size: 0.5rem; top: 4px; }
 
         .flash-green { animation: flashGreen 0.3s ease-in-out; }
         .flash-red { animation: flashRed 0.3s ease-in-out; }
@@ -556,6 +588,11 @@
                 font-size: 0.6rem;
             }
 
+            .piano.compact .white-key-wrapper { width: 28px; height: 140px; }
+            .piano.compact .piano-key { width: 28px; height: 140px; font-size: 0.6rem; padding-bottom: 6px; }
+            .piano.compact .piano-key:active { height: 138px; }
+            .piano.compact .black-key { width: 18px; height: 84px; right: -9px; font-size: 0.4rem; }
+
             .diff-btn {
                 padding: 6px 14px;
                 font-size: 0.85rem;
@@ -625,34 +662,7 @@
             </div>
 
             <div class="piano-container">
-                <div class="piano" id="noteButtons">
-                    <div class="white-key-wrapper">
-                        <button class="piano-key" data-note="C" disabled>C</button>
-                        <button class="black-key" data-note="C#" disabled>C#</button>
-                    </div>
-                    <div class="white-key-wrapper">
-                        <button class="piano-key" data-note="D" disabled>D</button>
-                        <button class="black-key" data-note="D#" disabled>D#</button>
-                    </div>
-                    <div class="white-key-wrapper">
-                        <button class="piano-key" data-note="E" disabled>E</button>
-                    </div>
-                    <div class="white-key-wrapper">
-                        <button class="piano-key" data-note="F" disabled>F</button>
-                        <button class="black-key" data-note="F#" disabled>F#</button>
-                    </div>
-                    <div class="white-key-wrapper">
-                        <button class="piano-key" data-note="G" disabled>G</button>
-                        <button class="black-key" data-note="G#" disabled>G#</button>
-                    </div>
-                    <div class="white-key-wrapper">
-                        <button class="piano-key" data-note="A" disabled>A</button>
-                        <button class="black-key" data-note="A#" disabled>A#</button>
-                    </div>
-                    <div class="white-key-wrapper">
-                        <button class="piano-key" data-note="B" disabled>B</button>
-                    </div>
-                </div>
+                <div class="piano" id="noteButtons"></div>
             </div>
         </div>
 
@@ -687,51 +697,137 @@
 
         // 전체 음표 주파수 (자연음 + 샵 + 플랫)
         const noteFrequencies = {
+            'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
             'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
             'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
             'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46,
             'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
+            'G#3': 207.65, 'A#3': 233.08,
             'C#4': 277.18, 'D#4': 311.13, 'F#4': 369.99, 'G#4': 415.30, 'A#4': 466.16,
-            'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61, 'A#5': 932.33,
+            'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61,
+            'Ab3': 207.65, 'Bb3': 233.08,
             'Db4': 277.18, 'Eb4': 311.13, 'Gb4': 369.99, 'Ab4': 415.30, 'Bb4': 466.16,
-            'Db5': 554.37, 'Eb5': 622.25, 'Gb5': 739.99, 'Ab5': 830.61, 'Bb5': 932.33
+            'Db5': 554.37, 'Eb5': 622.25, 'Gb5': 739.99, 'Ab5': 830.61
         };
 
         // 난이도별 음표 풀
         const notePools = {
             beginner: [
-                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
-                'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5'
+                'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'
             ],
             intermediate: [
+                'G3', 'A3', 'B3',
                 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
-                'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
+                'C5', 'D5', 'E5', 'F5', 'G5', 'A5',
+                'G#3', 'A#3',
                 'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
-                'C#5', 'D#5', 'F#5', 'G#5', 'A#5',
+                'C#5', 'D#5', 'F#5', 'G#5',
+                'Ab3', 'Bb3',
                 'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
-                'Db5', 'Eb5', 'Gb5', 'Ab5', 'Bb5'
+                'Db5', 'Eb5', 'Gb5', 'Ab5'
             ],
             advanced: [
+                'G3', 'A3', 'B3',
                 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
-                'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
+                'C5', 'D5', 'E5', 'F5', 'G5', 'A5',
+                'G#3', 'A#3',
                 'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
-                'C#5', 'D#5', 'F#5', 'G#5', 'A#5',
+                'C#5', 'D#5', 'F#5', 'G#5',
+                'Ab3', 'Bb3',
                 'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
-                'Db5', 'Eb5', 'Gb5', 'Ab5', 'Bb5'
+                'Db5', 'Eb5', 'Gb5', 'Ab5'
             ]
         };
 
-        // 샵 ↔ 플랫 변환 맵 (검은 건반 전환용)
-        const sharpLabels = ['C#', 'D#', 'F#', 'G#', 'A#'];
-        const flatLabels  = ['Db', 'Eb', 'Gb', 'Ab', 'Bb'];
-
-        // 플랫→샵 변환 (Tone.js 재생용)
+        // 샵 ↔ 플랫 변환
         const flatToSharp = {
             'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
         };
+        const sharpToFlat = {
+            'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
+        };
 
-        // 현재 건반이 플랫 모드인지
+        // 건반 설정
+        const keyboardConfigs = {
+            beginner: {
+                whiteKeys: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'],
+                showBlack: true,
+                compact: false
+            },
+            intermediate: {
+                whiteKeys: ['G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'],
+                showBlack: true,
+                compact: true
+            },
+            advanced: {
+                whiteKeys: ['G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'],
+                showBlack: true,
+                compact: true
+            }
+        };
+
+        // 해당 흰 건반에 검은 건반이 있는지 (E, B는 없음)
+        function hasBlackKey(noteName) {
+            return ['C', 'D', 'F', 'G', 'A'].includes(noteName.charAt(0));
+        }
+
+        // 흰 건반 → 오른쪽 검은 건반 이름 (샵)
+        function getBlackSharpName(whiteNote) {
+            return whiteNote.charAt(0) + '#' + whiteNote.slice(1);
+        }
+
         let isBlackKeyFlat = false;
+
+        // 피아노 건반 동적 생성
+        function buildPianoKeyboard(difficulty) {
+            const config = keyboardConfigs[difficulty] || keyboardConfigs.beginner;
+            const piano = document.getElementById('noteButtons');
+            piano.innerHTML = '';
+
+            if (config.compact) {
+                piano.classList.add('compact');
+            } else {
+                piano.classList.remove('compact');
+            }
+
+            config.whiteKeys.forEach(noteName => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'white-key-wrapper';
+
+                const whiteKey = document.createElement('button');
+                whiteKey.className = 'piano-key';
+                whiteKey.setAttribute('data-note', noteName);
+                whiteKey.disabled = true;
+
+                // 라벨: 음이름만 표시
+                const letter = noteName.charAt(0);
+                whiteKey.textContent = letter;
+
+                // Middle C 표시
+                if (noteName === 'C4') {
+                    whiteKey.classList.add('middle-c');
+                }
+
+                wrapper.appendChild(whiteKey);
+
+                // 검은 건반
+                if (config.showBlack && hasBlackKey(noteName)) {
+                    const sharpName = getBlackSharpName(noteName);
+                    const blackKey = document.createElement('button');
+                    blackKey.className = 'black-key';
+                    blackKey.setAttribute('data-note', sharpName);
+                    blackKey.setAttribute('data-sharp', sharpName);
+                    blackKey.disabled = true;
+                    // 검은 건반 라벨: 음이름만 (옥타브 제외)
+                    blackKey.textContent = letter + '#';
+                    wrapper.appendChild(blackKey);
+                }
+
+                piano.appendChild(wrapper);
+            });
+
+            isBlackKeyFlat = false;
+        }
 
         const diffNames = {
             beginner: '초급',
@@ -1012,19 +1108,25 @@
         // 검은 건반 라벨을 샵 또는 플랫으로 전환
         function updateBlackKeyLabels(useFlat) {
             isBlackKeyFlat = useFlat;
-            const blackKeys = document.querySelectorAll('.black-key[data-note]');
-            blackKeys.forEach((btn, idx) => {
-                if (idx < sharpLabels.length) {
-                    const label = useFlat ? flatLabels[idx] : sharpLabels[idx];
-                    btn.setAttribute('data-note', label);
-                    btn.textContent = label;
+            document.querySelectorAll('.black-key[data-sharp]').forEach(btn => {
+                const sharpNote = btn.getAttribute('data-sharp'); // e.g. "C#4"
+                const letter = sharpNote.replace(/[0-9]/g, '');   // "C#"
+                const octave = sharpNote.replace(/[^0-9]/g, '');  // "4"
+                if (useFlat && sharpToFlat[letter]) {
+                    const flatNote = sharpToFlat[letter] + octave;
+                    btn.setAttribute('data-note', flatNote);
+                    btn.textContent = sharpToFlat[letter]; // 옥타브 없이 표시
+                } else {
+                    btn.setAttribute('data-note', sharpNote);
+                    btn.textContent = letter; // 옥타브 없이 표시
                 }
             });
         }
 
-        // 음표가 플랫인지 확인
+        // 음표가 플랫인지 확인 (Bb, Db, Eb, Gb, Ab)
         function isFlat(noteName) {
-            return noteName.includes('b') && !noteName.startsWith('B');
+            const letter = noteName.replace(/[0-9]/g, '');
+            return ['Db', 'Eb', 'Gb', 'Ab', 'Bb'].includes(letter);
         }
 
         // 음표가 샵인지 확인
@@ -1071,15 +1173,10 @@
         function checkAnswer(selectedNote) {
             if (!gameActive || !currentNote) return;
 
-            const currentOctave = parseInt(currentNote.replace(/[^0-9]/g, '')) || 4;
-            // 정답: 옥타브 제거한 음이름 (C, D, C#, Db 등)
-            const correctNote = currentNote.replace(/[0-9]/g, '').trim();
-            const userNote = selectedNote.trim();
-            const isCorrect = (userNote === correctNote);
+            const isCorrect = (selectedNote === currentNote);
 
             // 재생용: 플랫을 샵으로 변환 (Tone.js 호환)
-            const noteToPlay = toPlayableName(userNote + currentOctave);
-            playNote(noteToPlay);
+            playNote(toPlayableName(selectedNote));
 
             clearKeyHighlights();
 
@@ -1088,12 +1185,12 @@
                 updateScore();
                 addToHistory(currentNote, 'blue');
                 renderStaff(currentNote, currentNote, 'blue');
-                highlightKey(userNote, 'key-correct');
+                highlightKey(selectedNote, 'key-correct');
             } else {
                 addToHistory(currentNote, 'red');
                 renderStaff(currentNote, currentNote, 'red');
-                highlightKey(userNote, 'key-wrong');
-                highlightKey(correctNote, 'key-show-answer');
+                highlightKey(selectedNote, 'key-wrong');
+                highlightKey(currentNote, 'key-show-answer');
             }
 
             setTimeout(() => {
@@ -1134,7 +1231,7 @@
             }
         }
 
-        function endGame() {
+        function endGame(stoppedManually) {
             gameActive = false;
             stopTimer();
             disableKeys();
@@ -1148,13 +1245,15 @@
             renderScoreboard();
             updateBestScoreDisplay();
 
+            const title = stoppedManually ? '🛑 게임 종료!' : '⏰ 시간 종료!';
+
             // 게임 종료 화면
             const overlay = document.createElement('div');
             overlay.className = 'game-over-overlay';
             overlay.id = 'gameOverOverlay';
             overlay.innerHTML = `
                 <div class="game-over-box">
-                    <h2>⏰ 시간 종료!</h2>
+                    <h2>${title}</h2>
                     <div>${currentUser || '?'} (${diffNames[currentDifficulty]})</div>
                     <div class="final-score">${score}점</div>
                     ${isNewBest ? '<div class="new-best">🎉 새로운 최고점수!</div>' : '<div>최고점수: ' + bestScoreVal + '점</div>'}
@@ -1202,6 +1301,7 @@
             score = 0;
             updateScore();
             clearNoteHistory();
+            buildPianoKeyboard(currentDifficulty);
             document.getElementById('startBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
             document.getElementById('restartBtn').disabled = false;
@@ -1232,8 +1332,8 @@
             document.getElementById('userSelect').disabled = false;
             document.getElementById('addUserBtn').disabled = false;
             document.getElementById('delUserBtn').disabled = false;
+            buildPianoKeyboard(currentDifficulty);
             disableKeys();
-            updateBlackKeyLabels(false); // 건반을 샵 표기로 리셋
             clearNoteHistory();
             initStaff();
         }
@@ -1247,6 +1347,8 @@
                 document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentDifficulty = btn.getAttribute('data-diff');
+                buildPianoKeyboard(currentDifficulty);
+                disableKeys();
                 updateBestScoreDisplay();
             });
         });
@@ -1257,7 +1359,7 @@
         });
 
         document.getElementById('stopBtn').addEventListener('click', () => {
-            if (gameActive) endGame();
+            if (gameActive) endGame(true);
         });
         document.getElementById('restartBtn').addEventListener('click', restartGame);
 
@@ -1265,22 +1367,12 @@
         document.getElementById('addUserBtn').addEventListener('click', onAddUser);
         document.getElementById('delUserBtn').addEventListener('click', onDelUser);
 
-        // 흰 건반 클릭
-        document.querySelectorAll('.piano-key').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (!gameActive) return;
-                unlockAudio();
-                checkAnswer(btn.getAttribute('data-note'));
-            });
-        });
-
-        // 검은 건반 클릭
-        document.querySelectorAll('.black-key').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (!gameActive) return;
-                unlockAudio();
-                checkAnswer(btn.getAttribute('data-note'));
-            });
+        // 건반 클릭 (이벤트 위임 - 동적 건반 지원)
+        document.getElementById('noteButtons').addEventListener('click', (e) => {
+            const btn = e.target.closest('.piano-key, .black-key');
+            if (!btn || !gameActive || btn.disabled) return;
+            unlockAudio();
+            checkAnswer(btn.getAttribute('data-note'));
         });
 
         document.addEventListener('click', unlockAudio, { once: true });
@@ -1293,6 +1385,8 @@
         function initializePage() {
             initAudio();
             populateUserSelect();
+            buildPianoKeyboard(currentDifficulty);
+            disableKeys();
             updateScore();
             renderScoreboard();
             initStaff();
