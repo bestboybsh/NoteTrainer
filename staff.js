@@ -51,9 +51,9 @@ function getVF() {
 // 오선지 크기 계산
 function getStaffDimensions() {
     const container = document.getElementById('staffContainer');
-    const containerWidth = container ? container.clientWidth : 600;
-    const width = Math.max(400, Math.min(600, containerWidth - 40));
-    return { width: width, height: 200 };
+    const containerWidth = container ? container.clientWidth : 400;
+    const width = Math.max(300, Math.min(420, containerWidth - 20));
+    return { width: width, height: 180 };
 }
 
 // 히스토리 초기화
