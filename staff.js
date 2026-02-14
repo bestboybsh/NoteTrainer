@@ -259,11 +259,8 @@ function renderStaff(currentNote, feedbackNote, feedbackColor, wrongNote) {
             const histNote = createStaveNote(VF, item.note, stemDir, true);
             if (!histNote) return;
 
-            const opacity = 0.3 + (idx / Math.max(noteHistory.length, 1)) * 0.4;
-            const colorMap = { 'blue': '#2196F3', 'red': '#F44336' };
-            const baseColor = colorMap[item.color] || '#999';
-            const alpha = Math.round(opacity * 255).toString(16).padStart(2, '0');
-            const fadedColor = baseColor + alpha;
+            const opacity = 0.4 + (idx / Math.max(noteHistory.length, 1)) * 0.3;
+            const fadedColor = `rgba(180, 180, 180, ${opacity.toFixed(2)})`;
 
             histNote.setStyle({ fillStyle: fadedColor, strokeStyle: fadedColor });
             tickables.push(histNote);
