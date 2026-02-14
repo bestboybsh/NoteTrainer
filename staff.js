@@ -89,12 +89,22 @@ function getVF() {
     return null;
 }
 
-// 오선지 크기 계산
+// 오선지 크기 계산 (컨테이너에 맞춤)
 function getStaffDimensions() {
     const container = document.getElementById('staffContainer');
-    const containerWidth = container ? container.clientWidth : 400;
-    const width = Math.max(500, Math.min(750, containerWidth - 20));
-    return { width: width, height: 500, scale: 2.8 };
+    const containerWidth = container ? container.clientWidth : 600;
+    const containerHeight = container ? container.clientHeight : 300;
+
+    // 컨테이너 크기에서 패딩 빼기
+    const availW = Math.max(300, containerWidth - 10);
+    const availH = Math.max(150, containerHeight - 10);
+
+    // 스케일: 오선지 세로 간격을 보기 좋게 유지
+    // 기본 오선 영역은 약 80px (unscaled), 위아래 여유 포함 ~120px
+    const idealScale = Math.min(availH / 130, availW / 260);
+    const scale = Math.max(1.2, Math.min(3.2, idealScale));
+
+    return { width: availW, height: availH, scale: scale };
 }
 
 // 히스토리 초기화
@@ -152,6 +162,16 @@ function createStaveNote(VF, noteName, stemDir, showLabel) {
     return note;
 }
 
+// 오선 Y위치 계산 (세로 중앙 정렬)
+function getStaveY(dim) {
+    const sc = dim.scale || 1;
+    // 오선 높이 약 80px (unscaled). 중앙 정렬
+    const scaledAreaH = dim.height / sc;
+    const staveH = 80;
+    const y = Math.max(5, (scaledAreaH - staveH) / 2 - 10);
+    return y;
+}
+
 // 빈 오선지 그리기
 function initStaff() {
     const VF = getVF();
@@ -171,7 +191,8 @@ function initStaff() {
     context.scale(sc, sc);
 
     const staveWidth = (dim.width / sc) - 20;
-    const stave = new VF.Stave(10, 30, staveWidth);
+    const staveY = getStaveY(dim);
+    const stave = new VF.Stave(10, staveY, staveWidth);
     stave.addClef(currentStaffClef);
     stave.setContext(context).draw();
 }
@@ -196,7 +217,8 @@ function renderStaff(currentNote, feedbackNote, feedbackColor) {
     context.scale(sc, sc);
 
     const staveWidth = (dim.width / sc) - 20;
-    const stave = new VF.Stave(10, 30, staveWidth);
+    const staveY = getStaveY(dim);
+    const stave = new VF.Stave(10, staveY, staveWidth);
     stave.addClef(currentStaffClef);
     stave.setContext(context).draw();
 
