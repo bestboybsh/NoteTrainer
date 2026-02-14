@@ -21,14 +21,14 @@
             background: #f5f5f5;
             height: 100vh;
             height: 100dvh;
-            padding: 10px;
+            padding: 6px;
             overflow: hidden;
         }
 
         /* ===== 전체 레이아웃: 게임(왼쪽) + 스코어보드(오른쪽) ===== */
         .page-wrapper {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             max-width: 1200px;
             margin: 0 auto;
             height: 100%;
@@ -41,12 +41,13 @@
             min-width: 0;
             background: white;
             border-radius: 16px;
-            padding: 12px 15px;
+            padding: 6px 10px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             text-align: center;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            gap: 2px;
         }
 
         /* 스코어보드 */
@@ -60,35 +61,44 @@
             overflow-y: auto;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        /* ===== 사용자 선택 ===== */
-        .user-section {
+        /* ===== 툴바 행 ===== */
+        .toolbar-row {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 8px;
+            padding: 4px 0;
             flex-wrap: wrap;
+            flex-shrink: 0;
         }
 
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 20px;
+            background: #ddd;
+            flex-shrink: 0;
+        }
+
+        /* ===== 사용자 선택 (compact) ===== */
         .user-section label {
             font-weight: bold;
             color: #555;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         #userSelect {
-            padding: 4px 10px;
-            font-size: 0.9rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
             background: white;
-            min-width: 100px;
+            min-width: 80px;
             cursor: pointer;
         }
 
@@ -98,15 +108,16 @@
         }
 
         .user-add-btn {
-            padding: 4px 10px;
-            font-size: 0.85rem;
-            border: 2px solid #4CAF50;
-            border-radius: 8px;
+            padding: 2px 7px;
+            font-size: 0.8rem;
+            border: 1.5px solid #4CAF50;
+            border-radius: 6px;
             background: #4CAF50;
             color: white;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s;
+            line-height: 1;
         }
 
         .user-add-btn:hover {
@@ -114,15 +125,16 @@
         }
 
         .user-del-btn {
-            padding: 4px 8px;
-            font-size: 0.85rem;
-            border: 2px solid #F44336;
-            border-radius: 8px;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border: 1.5px solid #F44336;
+            border-radius: 6px;
             background: white;
             color: #F44336;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s;
+            line-height: 1;
         }
 
         .user-del-btn:hover {
@@ -130,23 +142,28 @@
             color: white;
         }
 
+        /* ===== 점수 (inline) ===== */
         .score-container {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
             color: #555;
         }
 
         .score-item {
             display: flex;
-            flex-direction: column;
-            gap: 2px;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: #888;
         }
 
         .score-value {
-            font-size: 1.3rem;
+            font-size: 0.95rem;
             font-weight: bold;
             color: #2196F3;
         }
@@ -163,9 +180,9 @@
             background: white;
             border: 2px solid #ddd;
             border-radius: 8px;
-            padding: 5px;
-            margin: 5px auto;
-            flex: 1;
+            padding: 2px;
+            margin: 2px auto;
+            flex: 1 1 0;
             min-height: 0;
             max-width: 770px;
             width: 100%;
@@ -197,26 +214,22 @@
             background: white;
         }
 
-        .controls {
-            margin: 8px 0;
-        }
-
+        /* ===== 버튼 (compact) ===== */
         .btn {
-            padding: 8px 18px;
-            font-size: 0.9rem;
+            padding: 4px 12px;
+            font-size: 0.8rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             background: #2196F3;
             color: white;
             font-weight: bold;
             transition: all 0.2s;
-            margin: 0 6px 4px 6px;
         }
 
         .btn:hover {
-            background: #1976D2;
-            transform: translateY(-2px);
+            filter: brightness(0.9);
+            transform: translateY(-1px);
         }
 
         .btn:active {
@@ -229,20 +242,17 @@
             transform: none;
         }
 
-        /* 자리표 선택 */
-        .clef-container {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
+        .btn-stop { background: #F44336; }
+        .btn-stop:disabled { background: #ccc; }
+        .btn-restart { background: #2196F3; }
 
+        /* 자리표 선택 */
         .clef-btn {
-            padding: 5px 14px;
-            font-size: 0.9rem;
+            padding: 3px 10px;
+            font-size: 0.78rem;
             font-weight: bold;
-            border: 2px solid #ccc;
-            border-radius: 20px;
+            border: 1.5px solid #ccc;
+            border-radius: 14px;
             background: white;
             color: #777;
             cursor: pointer;
@@ -266,19 +276,12 @@
         }
 
         /* 난이도 선택 */
-        .difficulty-container {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-
         .diff-btn {
-            padding: 5px 14px;
-            font-size: 0.85rem;
+            padding: 3px 10px;
+            font-size: 0.78rem;
             font-weight: bold;
-            border: 2px solid #ccc;
-            border-radius: 20px;
+            border: 1.5px solid #ccc;
+            border-radius: 14px;
             background: white;
             color: #777;
             cursor: pointer;
@@ -301,23 +304,19 @@
             cursor: not-allowed;
         }
 
-        /* 옥타브 선택 */
-        .octave-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
+        /* 옥타브 선택 (inline) */
+        .octave-group {
+            gap: 4px;
         }
 
         .octave-btn {
-            width: 32px;
-            height: 32px;
-            border: 2px solid #ccc;
+            width: 24px;
+            height: 24px;
+            border: 1.5px solid #ccc;
             border-radius: 50%;
             background: white;
             color: #555;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -339,17 +338,18 @@
         }
 
         .octave-display {
-            font-size: 0.9rem;
+            font-size: 0.78rem;
             font-weight: bold;
             color: #555;
-            min-width: 90px;
+            min-width: 70px;
             text-align: center;
         }
 
         .piano-container {
-            margin-top: 8px;
+            margin-top: 2px;
             display: flex;
             justify-content: center;
+            flex-shrink: 0;
             overflow-x: auto;
             flex-shrink: 0;
         }
@@ -440,10 +440,10 @@
         }
 
         .piano-key.key-show-answer {
-            box-shadow: 0 0 0 4px #F44336, 0 4px 8px rgba(0,0,0,0.15) !important;
-            color: #F44336 !important;
+            box-shadow: 0 0 0 4px #333, 0 4px 8px rgba(0,0,0,0.15) !important;
+            color: #333 !important;
             font-size: 1.5rem !important;
-            border-color: #F44336 !important;
+            border-color: #333 !important;
         }
 
         .black-key {
@@ -501,8 +501,9 @@
         }
 
         .black-key.key-show-answer {
-            box-shadow: 0 0 0 3px #F44336, 0 4px 6px rgba(0,0,0,0.4) !important;
-            color: #F44336 !important;
+            box-shadow: 0 0 0 3px #333, 0 4px 6px rgba(0,0,0,0.4) !important;
+            color: #fff !important;
+            background: #555 !important;
         }
 
         /* ===== 컴팩트 키보드 (중급/고급) ===== */
@@ -684,22 +685,17 @@
 
         /* 높이가 작은 화면 (노트북 등) */
         @media (max-height: 750px) {
-            body { padding: 5px; }
-            h1 { font-size: 1.2rem; margin-bottom: 4px; }
-            .user-section { margin-bottom: 4px; gap: 4px; }
-            .octave-container { margin-bottom: 3px; gap: 5px; }
-            .octave-btn { width: 26px; height: 26px; font-size: 0.75rem; }
-            .octave-display { font-size: 0.8rem; min-width: 70px; }
-            .score-container { margin-bottom: 4px; gap: 12px; font-size: 0.85rem; }
-            .score-value { font-size: 1.1rem; }
-            .clef-container { margin-bottom: 4px; gap: 6px; }
-            .clef-btn { padding: 3px 10px; font-size: 0.8rem; }
-            .difficulty-container { margin-bottom: 4px; gap: 6px; }
-            .diff-btn { padding: 3px 10px; font-size: 0.8rem; }
-            .controls { margin: 4px 0; }
-            .btn { padding: 5px 12px; font-size: 0.8rem; margin: 0 4px 2px 4px; }
-            .staff-container { margin: 3px auto; padding: 3px; }
-            .piano-container { margin-top: 4px; }
+            body { padding: 4px; }
+            .toolbar-row { padding: 2px 0; gap: 6px; }
+            .octave-btn { width: 22px; height: 22px; font-size: 0.7rem; }
+            .octave-display { font-size: 0.72rem; min-width: 60px; }
+            .score-value { font-size: 0.85rem; }
+            .score-label { font-size: 0.7rem; }
+            .clef-btn { padding: 2px 8px; font-size: 0.72rem; }
+            .diff-btn { padding: 2px 8px; font-size: 0.72rem; }
+            .btn { padding: 3px 10px; font-size: 0.75rem; }
+            .staff-container { margin: 1px auto; padding: 2px; }
+            .piano-container { margin-top: 2px; }
             .piano { height: 120px; }
             .white-key-wrapper { width: 42px; height: 120px; }
             .piano-key { width: 42px; height: 120px; font-size: 0.9rem; padding-bottom: 6px; }
@@ -713,66 +709,50 @@
             .piano.compact .piano-key:active, .piano.compact .piano-key.key-pressed { height: 108px; }
             .piano.compact .black-key { width: 18px; height: 66px; right: -9px; font-size: 0.45rem; }
             .piano.compact .black-key.active-black:active { height: 64px; }
-            .game-area { padding: 6px 10px; }
+            .game-area { padding: 4px 8px; }
         }
 
         /* 모바일 세로 */
         @media (max-width: 600px) {
-            body { padding: 4px; }
-            h1 { font-size: 1.2rem; margin-bottom: 4px; }
-
-            .score-container {
-                font-size: 0.85rem;
-                gap: 12px;
-                margin-bottom: 4px;
-            }
-            .score-value { font-size: 1.1rem; }
-
-            .user-section { gap: 4px; margin-bottom: 4px; }
-            .user-add-btn, .user-del-btn { padding: 3px 6px; font-size: 0.75rem; }
-            #userSelect { min-width: 70px; font-size: 0.8rem; padding: 3px 6px; }
-
-            .clef-btn { padding: 3px 10px; font-size: 0.8rem; }
-            .diff-btn { padding: 3px 10px; font-size: 0.8rem; }
-
-            .controls { margin: 4px 0; }
-            .btn { padding: 6px 12px; font-size: 0.85rem; margin: 0 4px 2px 4px; }
-
-            .staff-container { margin: 3px auto; padding: 3px; }
-
-            .piano-container { margin-top: 4px; }
+            body { padding: 3px; }
+            .toolbar-row { padding: 2px 0; gap: 4px; }
+            .toolbar-sep { height: 16px; }
+            .score-label { font-size: 0.65rem; }
+            .score-value { font-size: 0.8rem; }
+            .user-add-btn, .user-del-btn { padding: 2px 5px; font-size: 0.7rem; }
+            #userSelect { min-width: 60px; font-size: 0.75rem; padding: 2px 4px; }
+            .clef-btn { padding: 2px 7px; font-size: 0.7rem; }
+            .diff-btn { padding: 2px 7px; font-size: 0.7rem; }
+            .btn { padding: 3px 8px; font-size: 0.75rem; }
+            .staff-container { margin: 1px auto; padding: 2px; }
+            .piano-container { margin-top: 2px; }
             .piano { height: 130px; }
             .white-key-wrapper { width: 42px; height: 130px; }
-            .piano-key {
-                width: 42px; height: 130px;
-                font-size: 0.95rem; padding-bottom: 8px;
-            }
+            .piano-key { width: 42px; height: 130px; font-size: 0.95rem; padding-bottom: 8px; }
             .piano-key:active, .piano-key.key-pressed { height: 128px; }
             .piano-key:disabled:active { height: 130px; }
             .black-key { width: 26px; height: 78px; right: -14px; font-size: 0.6rem; }
             .black-key.active-black:active { height: 76px; }
-
             .piano.compact .white-key-wrapper { width: 24px; height: 120px; }
             .piano.compact .piano-key { width: 24px; height: 120px; font-size: 0.55rem; padding-bottom: 4px; }
             .piano.compact .piano-key:active, .piano.compact .piano-key.key-pressed { height: 118px; }
             .piano.compact .black-key { width: 16px; height: 72px; right: -8px; font-size: 0.4rem; }
             .piano.compact .black-key.active-black:active { height: 70px; }
-
-            .game-area { padding: 6px 8px; }
-
+            .game-area { padding: 4px 6px; }
             .scoreboard { padding: 10px; }
             .scoreboard h2 { font-size: 1rem; margin-bottom: 8px; }
         }
 
         /* 아주 작은 모바일 */
         @media (max-width: 380px) {
+            .toolbar-row { gap: 3px; }
+            .toolbar-sep { display: none; }
             .piano { height: 110px; }
             .white-key-wrapper { width: 36px; height: 110px; }
             .piano-key { width: 36px; height: 110px; font-size: 0.8rem; padding-bottom: 6px; }
             .piano-key:active, .piano-key.key-pressed { height: 108px; }
             .piano-key:disabled:active { height: 110px; }
             .black-key { width: 22px; height: 66px; right: -12px; font-size: 0.5rem; }
-
             .piano.compact .white-key-wrapper { width: 20px; height: 100px; }
             .piano.compact .piano-key { width: 20px; height: 100px; font-size: 0.5rem; padding-bottom: 3px; }
             .piano.compact .piano-key:active, .piano.compact .piano-key.key-pressed { height: 98px; }
@@ -781,15 +761,16 @@
 
         /* 가로모드 모바일/태블릿 */
         @media (max-height: 500px) {
-            h1 { font-size: 1rem; margin-bottom: 2px; }
-            .user-section { margin-bottom: 2px; }
-            .score-container { margin-bottom: 2px; }
-            .clef-container { margin-bottom: 2px; }
-            .difficulty-container { margin-bottom: 2px; }
-            .controls { margin: 2px 0; }
-            .btn { padding: 4px 10px; font-size: 0.75rem; margin: 0 3px 1px 3px; }
-            .staff-container { margin: 2px auto; padding: 2px; }
-            .piano-container { margin-top: 2px; }
+            .toolbar-row { padding: 1px 0; gap: 4px; }
+            .toolbar-sep { height: 14px; }
+            .btn { padding: 2px 8px; font-size: 0.7rem; }
+            .clef-btn, .diff-btn { padding: 2px 6px; font-size: 0.65rem; }
+            .octave-btn { width: 20px; height: 20px; font-size: 0.65rem; }
+            .octave-display { font-size: 0.65rem; min-width: 55px; }
+            .score-label { font-size: 0.6rem; }
+            .score-value { font-size: 0.75rem; }
+            .staff-container { margin: 1px auto; padding: 1px; }
+            .piano-container { margin-top: 1px; }
             .piano { height: 90px; }
             .white-key-wrapper { width: 36px; height: 90px; }
             .piano-key { width: 36px; height: 90px; font-size: 0.75rem; padding-bottom: 4px; }
@@ -803,7 +784,7 @@
             .piano.compact .piano-key:active, .piano.compact .piano-key.key-pressed { height: 78px; }
             .piano.compact .black-key { width: 14px; height: 48px; right: -7px; font-size: 0.35rem; }
             .piano.compact .black-key.active-black:active { height: 46px; }
-            .game-area { padding: 4px 6px; }
+            .game-area { padding: 3px 5px; }
         }
     </style>
 </head>
@@ -811,64 +792,68 @@
     <div class="page-wrapper">
         <!-- 게임 영역 -->
         <div class="game-area">
-            <h1>🎵 Music Sight-Reading</h1>
-
-            <!-- 사용자 선택 -->
-            <div class="user-section">
-                <label>👤</label>
-                <select id="userSelect"></select>
-                <button class="user-add-btn" id="addUserBtn">+ 추가</button>
-                <button class="user-del-btn" id="delUserBtn">삭제</button>
-            </div>
-
-            <div class="score-container">
-                <div class="score-item">
-                    <span>Score</span>
-                    <span class="score-value" id="currentScore">0</span>
+            <!-- 상단 툴바 Row 1: 사용자 + 점수 + 타이머 -->
+            <div class="toolbar-row">
+                <div class="toolbar-group user-section">
+                    <label>👤</label>
+                    <select id="userSelect"></select>
+                    <button class="user-add-btn" id="addUserBtn">+</button>
+                    <button class="user-del-btn" id="delUserBtn">✕</button>
                 </div>
-                <div class="score-item">
-                    <span>Best</span>
-                    <span class="score-value" id="bestScore">0</span>
+                <div class="toolbar-group score-container">
+                    <div class="score-item">
+                        <span class="score-label">Score</span>
+                        <span class="score-value" id="currentScore">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Best</span>
+                        <span class="score-value" id="bestScore">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">배율</span>
+                        <span class="score-value multiplier" id="multiplierDisplay">x1</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="score-label">Time</span>
+                        <span class="score-value" id="timer">1:00</span>
+                    </div>
                 </div>
-                <div class="score-item">
-                    <span>배율</span>
-                    <span class="score-value multiplier" id="multiplierDisplay">x1</span>
+            </div>
+
+            <!-- 상단 툴바 Row 2: 난이도 + 자리표 + 옥타브 + 버튼 -->
+            <div class="toolbar-row">
+                <div class="toolbar-group">
+                    <button class="diff-btn active" data-diff="beginner">초급</button>
+                    <button class="diff-btn" data-diff="intermediate">중급</button>
+                    <button class="diff-btn" data-diff="advanced">고급</button>
                 </div>
-                <div class="score-item">
-                    <span>Time</span>
-                    <span class="score-value" id="timer">1:00</span>
+                <div class="toolbar-sep"></div>
+                <div class="toolbar-group">
+                    <button class="clef-btn active" data-clef="treble">높은음</button>
+                    <button class="clef-btn" data-clef="bass">낮은음</button>
+                </div>
+                <div class="toolbar-sep"></div>
+                <div class="toolbar-group octave-group">
+                    <button class="octave-btn" id="octaveDown">◀</button>
+                    <span class="octave-display" id="octaveDisplay">C4 ~ B4</span>
+                    <button class="octave-btn" id="octaveUp">▶</button>
+                </div>
+                <div class="toolbar-sep"></div>
+                <div class="toolbar-group">
+                    <button class="btn btn-start" id="startBtn">Start</button>
+                    <button class="btn btn-stop" id="stopBtn" disabled>Stop</button>
+                    <button class="btn btn-restart" id="restartBtn" disabled>Restart</button>
                 </div>
             </div>
 
-            <div class="clef-container">
-                <button class="clef-btn active" data-clef="treble">🎼 높은음자리표</button>
-                <button class="clef-btn" data-clef="bass">🎼 낮은음자리표</button>
-            </div>
-
-            <div class="difficulty-container">
-                <button class="diff-btn active" data-diff="beginner">초급</button>
-                <button class="diff-btn" data-diff="intermediate">중급</button>
-                <button class="diff-btn" data-diff="advanced">고급</button>
-            </div>
-
-            <div class="octave-container">
-                <button class="octave-btn" id="octaveDown" title="옥타브 내리기">◀</button>
-                <span class="octave-display" id="octaveDisplay">C4 ~ B4</span>
-                <button class="octave-btn" id="octaveUp" title="옥타브 올리기">▶</button>
-            </div>
-
-            <div class="controls">
-                <button class="btn" id="startBtn">Start</button>
-                <button class="btn" id="stopBtn" disabled style="background:#F44336;">Stop</button>
-                <button class="btn" id="restartBtn" disabled>Restart</button>
-            </div>
-
+            <!-- 악보 -->
             <div class="staff-container" id="staffContainer">
                 <div id="staffDiv"></div>
                 <div id="loadingMsg">Loading...</div>
                 <div id="errorMsg" style="display: none;"></div>
             </div>
 
+            <!-- 건반 -->
             <div class="piano-container">
                 <div class="piano" id="noteButtons"></div>
             </div>
@@ -1518,9 +1503,11 @@
         }
 
         let pendingHistory = null; // 다음 음표로 넘어갈 때 히스토리에 추가할 항목
+        let isProcessing = false; // 연속 입력 방지
 
         function checkAnswer(selectedNote) {
-            if (!gameActive || !currentNote) return;
+            if (!gameActive || !currentNote || isProcessing) return;
+            isProcessing = true;
 
             const isCorrect = (selectedNote === currentNote);
 
@@ -1539,7 +1526,7 @@
             } else {
                 score = Math.max(0, score - 1);
                 updateScore();
-                // 히스토리에 바로 넣지 않고, 현재 위치에서 정답+오답 표시
+                // 정답 음표는 검은색 + 계이름 라벨, 틀린 음표는 빨간색으로 겹침
                 renderStaff(currentNote, currentNote, 'red', selectedNote);
                 highlightKey(selectedNote, 'key-wrong');
                 highlightKey(currentNote, 'key-show-answer');
@@ -1556,6 +1543,7 @@
                     }
                     showNextNote();
                 }
+                isProcessing = false;
             }, isCorrect ? 400 : 800);
         }
 

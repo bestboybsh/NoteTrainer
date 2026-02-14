@@ -269,21 +269,17 @@ function renderStaff(currentNote, feedbackNote, feedbackColor, wrongNote) {
             tickables.push(histNote);
         });
 
-        // 현재 음표 (정답)
+        // 현재 음표 (정답) — 틀렸을 때는 검은색 유지 + 계이름 라벨
         if (currentNote && vexFlowNotes[currentNote]) {
             const stemDir = getStemDirection(currentNote);
             const showLabel = !!feedbackColor;
             const mainNote = createStaveNote(VF, currentNote, stemDir, showLabel);
 
             if (mainNote) {
-                if (feedbackColor) {
-                    const colorMap = { 'blue': '#2196F3', 'red': '#F44336' };
-                    let c;
-                    if (hasWrong) {
-                        c = '#2196F3'; // 틀렸을 때 정답은 항상 파란색
-                    } else {
-                        c = colorMap[feedbackColor] || '#333';
-                    }
+                // 맞았을 때만 파란색, 틀렸을 때는 검은색 유지
+                if (feedbackColor && !hasWrong) {
+                    const colorMap = { 'blue': '#2196F3' };
+                    const c = colorMap[feedbackColor] || '#333';
                     mainNote.setStyle({ fillStyle: c, strokeStyle: c });
                 }
                 tickables.push(mainNote);
@@ -301,22 +297,19 @@ function renderStaff(currentNote, feedbackNote, feedbackColor, wrongNote) {
         voice1.setStrict(false);
         voice1.addTickables(tickables);
 
-        // 틀린 음표를 두 번째 보이스로 (같은 x 위치에 겹침)
+        // 틀린 음표: 2번째 보이스로 같은 위치에 빨간색 겹침
         if (hasWrong) {
             const wrongTickables = [];
-            // 정답 음표와 같은 위치에 오도록 앞을 GhostNote로 채움
             for (let i = 0; i < tickables.length - 2; i++) {
                 wrongTickables.push(new VF.GhostNote({ duration: 'q' }));
             }
-            // 틀린 음표 (빨간색)
             const wrongStemDir = getStemDirection(wrongNote);
-            const wrongStaveNote = createStaveNote(VF, wrongNote, wrongStemDir, true);
+            const wrongStaveNote = createStaveNote(VF, wrongNote, wrongStemDir, false);
             if (wrongStaveNote) {
                 const wrongColor = '#F44336';
                 wrongStaveNote.setStyle({ fillStyle: wrongColor, strokeStyle: wrongColor });
                 wrongTickables.push(wrongStaveNote);
             }
-            // 뒤에 여백
             wrongTickables.push(new VF.GhostNote({ duration: 'q' }));
 
             const voice2 = new VF.Voice({
