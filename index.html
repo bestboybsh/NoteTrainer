@@ -85,6 +85,23 @@
             flex-shrink: 0;
         }
 
+        /* ===== 언어 선택 ===== */
+        .lang-select {
+            padding: 2px 4px;
+            font-size: 0.78rem;
+            font-weight: bold;
+            border: 1.5px solid #ccc;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            color: #555;
+        }
+
+        .lang-select:focus {
+            border-color: #FF9800;
+            outline: none;
+        }
+
         /* ===== 사용자 선택 (compact) ===== */
         .user-section label {
             font-weight: bold;
@@ -792,8 +809,18 @@
     <div class="page-wrapper">
         <!-- 게임 영역 -->
         <div class="game-area">
-            <!-- 상단 툴바 Row 1: 사용자 + 점수 + 타이머 -->
+            <!-- 상단 툴바 Row 1: 언어 + 사용자 + 점수 + 타이머 -->
             <div class="toolbar-row">
+                <div class="toolbar-group">
+                    <select id="langSelect" class="lang-select">
+                        <option value="en">EN</option>
+                        <option value="es">ES</option>
+                        <option value="ko">한</option>
+                        <option value="ja">日</option>
+                        <option value="zh">中</option>
+                    </select>
+                </div>
+                <div class="toolbar-sep"></div>
                 <div class="toolbar-group user-section">
                     <label>👤</label>
                     <select id="userSelect"></select>
@@ -802,19 +829,19 @@
                 </div>
                 <div class="toolbar-group score-container">
                     <div class="score-item">
-                        <span class="score-label">Score</span>
+                        <span class="score-label" id="lblScore">Score</span>
                         <span class="score-value" id="currentScore">0</span>
                     </div>
                     <div class="score-item">
-                        <span class="score-label">Best</span>
+                        <span class="score-label" id="lblBest">Best</span>
                         <span class="score-value" id="bestScore">0</span>
                     </div>
                     <div class="score-item">
-                        <span class="score-label">배율</span>
+                        <span class="score-label" id="lblMult">Mult</span>
                         <span class="score-value multiplier" id="multiplierDisplay">x1</span>
                     </div>
                     <div class="score-item">
-                        <span class="score-label">Time</span>
+                        <span class="score-label" id="lblTime">Time</span>
                         <span class="score-value" id="timer">1:00</span>
                     </div>
                 </div>
@@ -823,14 +850,14 @@
             <!-- 상단 툴바 Row 2: 난이도 + 자리표 + 옥타브 + 버튼 -->
             <div class="toolbar-row">
                 <div class="toolbar-group">
-                    <button class="diff-btn active" data-diff="beginner">초급</button>
-                    <button class="diff-btn" data-diff="intermediate">중급</button>
-                    <button class="diff-btn" data-diff="advanced">고급</button>
+                    <button class="diff-btn active" data-diff="beginner">Beginner</button>
+                    <button class="diff-btn" data-diff="intermediate">Inter</button>
+                    <button class="diff-btn" data-diff="advanced">Adv</button>
                 </div>
                 <div class="toolbar-sep"></div>
                 <div class="toolbar-group">
-                    <button class="clef-btn active" data-clef="treble">높은음</button>
-                    <button class="clef-btn" data-clef="bass">낮은음</button>
+                    <button class="clef-btn active" data-clef="treble">Treble</button>
+                    <button class="clef-btn" data-clef="bass">Bass</button>
                 </div>
                 <div class="toolbar-sep"></div>
                 <div class="toolbar-group octave-group">
@@ -843,6 +870,7 @@
                     <button class="btn btn-start" id="startBtn">Start</button>
                     <button class="btn btn-stop" id="stopBtn" disabled>Stop</button>
                     <button class="btn btn-restart" id="restartBtn" disabled>Restart</button>
+
                 </div>
             </div>
 
@@ -861,7 +889,7 @@
 
         <!-- 스코어보드 -->
         <div class="scoreboard" id="scoreboardPanel">
-            <h2>🏆 Score Board <button class="sb-toggle-btn" id="sbToggleBtn" onclick="toggleScoreboard()">▼</button></h2>
+            <h2><span id="sbTitle">🏆 Score Board</span> <button class="sb-toggle-btn" id="sbToggleBtn" onclick="toggleScoreboard()">▼</button></h2>
             <div id="scoreboardContent"></div>
         </div>
     </div>
@@ -886,8 +914,142 @@
         let currentDifficulty = 'beginner';
         let currentClef = 'treble';
         let currentUser = null;
+        let currentLang = 'en';
 
         const STORAGE_KEY = 'noteTrainerData';
+
+        // ===== 다국어 번역 =====
+        const translations = {
+            en: {
+                score: 'Score', best: 'Best', multiplier: 'Mult', time: 'Time',
+                treble: 'Treble', bass: 'Bass',
+                beginner: 'Beginner', intermediate: 'Inter', advanced: 'Adv',
+                start: 'Start', stop: 'Stop', restart: 'Restart',
+                scoreBoard: '🏆 Score Board',
+                noRecords: 'No records yet',
+                name: 'Name', scoreCol: 'Score',
+                diffBeginner: 'Beginner', diffIntermediate: 'Intermediate', diffAdvanced: 'Advanced',
+                gameOver: '🛑 Game Over!', timeUp: '⏰ Time\'s Up!',
+                points: 'pts', newBest: '🎉 New High Score!', bestScore: 'Best',
+                playAgain: 'Play Again',
+                promptUser: 'Enter new user name:', alertExists: 'Name already exists.',
+                alertMinUser: 'At least 1 user is required.',
+                confirmDelete: 'Delete user "{name}"?\nAll score records will be deleted.',
+                selectUser: 'Please select a user.',
+                loadError: 'Cannot load VexFlow library. Check internet connection and refresh.'
+            },
+            es: {
+                score: 'Puntos', best: 'Mejor', multiplier: 'Mult', time: 'Tiempo',
+                treble: 'Agudo', bass: 'Grave',
+                beginner: 'Fácil', intermediate: 'Medio', advanced: 'Difícil',
+                start: 'Iniciar', stop: 'Parar', restart: 'Reiniciar',
+                scoreBoard: '🏆 Puntuación',
+                noRecords: 'Sin registros',
+                name: 'Nombre', scoreCol: 'Puntos',
+                diffBeginner: 'Fácil', diffIntermediate: 'Medio', diffAdvanced: 'Difícil',
+                gameOver: '🛑 ¡Fin del juego!', timeUp: '⏰ ¡Tiempo!',
+                points: 'pts', newBest: '🎉 ¡Nueva mejor puntuación!', bestScore: 'Mejor',
+                playAgain: 'Jugar de nuevo',
+                promptUser: 'Ingrese nombre de usuario:', alertExists: 'El nombre ya existe.',
+                alertMinUser: 'Se necesita al menos 1 usuario.',
+                confirmDelete: '¿Eliminar usuario "{name}"?\nSe borrarán todos los registros.',
+                selectUser: 'Por favor seleccione un usuario.',
+                loadError: 'No se puede cargar VexFlow. Verifique la conexión y recargue.'
+            },
+            ko: {
+                score: '점수', best: '최고', multiplier: '배율', time: '시간',
+                treble: '높은음', bass: '낮은음',
+                beginner: '초급', intermediate: '중급', advanced: '고급',
+                start: '시작', stop: '정지', restart: '재시작',
+                scoreBoard: '🏆 점수판',
+                noRecords: '아직 기록이 없습니다',
+                name: '이름', scoreCol: '점수',
+                diffBeginner: '초급', diffIntermediate: '중급', diffAdvanced: '고급',
+                gameOver: '🛑 게임 종료!', timeUp: '⏰ 시간 종료!',
+                points: '점', newBest: '🎉 새로운 최고점수!', bestScore: '최고점수',
+                playAgain: '다시 하기',
+                promptUser: '새 사용자 이름을 입력하세요:', alertExists: '이미 존재하는 이름입니다.',
+                alertMinUser: '최소 1명의 사용자가 필요합니다.',
+                confirmDelete: '"{name}" 사용자를 삭제하시겠습니까?\n모든 점수 기록이 삭제됩니다.',
+                selectUser: '사용자를 선택해주세요.',
+                loadError: 'VexFlow 라이브러리를 로드할 수 없습니다. 인터넷 연결을 확인 후 새로고침하세요.'
+            },
+            ja: {
+                score: 'スコア', best: '最高', multiplier: '倍率', time: '時間',
+                treble: 'ト音', bass: 'ヘ音',
+                beginner: '初級', intermediate: '中級', advanced: '上級',
+                start: '開始', stop: '停止', restart: 'リセット',
+                scoreBoard: '🏆 スコアボード',
+                noRecords: '記録がありません',
+                name: '名前', scoreCol: 'スコア',
+                diffBeginner: '初級', diffIntermediate: '中級', diffAdvanced: '上級',
+                gameOver: '🛑 ゲーム終了！', timeUp: '⏰ 時間切れ！',
+                points: '点', newBest: '🎉 新記録！', bestScore: '最高点',
+                playAgain: 'もう一度',
+                promptUser: '新しいユーザー名を入力:', alertExists: '既に存在する名前です。',
+                alertMinUser: 'ユーザーは最低1人必要です。',
+                confirmDelete: '「{name}」を削除しますか？\nすべてのスコアが削除されます。',
+                selectUser: 'ユーザーを選択してください。',
+                loadError: 'VexFlowを読み込めません。接続を確認して再読み込みしてください。'
+            },
+            zh: {
+                score: '分数', best: '最高', multiplier: '倍率', time: '时间',
+                treble: '高音', bass: '低音',
+                beginner: '初级', intermediate: '中级', advanced: '高级',
+                start: '开始', stop: '停止', restart: '重新开始',
+                scoreBoard: '🏆 排行榜',
+                noRecords: '暂无记录',
+                name: '姓名', scoreCol: '分数',
+                diffBeginner: '初级', diffIntermediate: '中级', diffAdvanced: '高级',
+                gameOver: '🛑 游戏结束！', timeUp: '⏰ 时间到！',
+                points: '分', newBest: '🎉 新纪录！', bestScore: '最高分',
+                playAgain: '再来一次',
+                promptUser: '请输入新用户名：', alertExists: '该名称已存在。',
+                alertMinUser: '至少需要1个用户。',
+                confirmDelete: '删除用户"{name}"？\n所有分数记录将被删除。',
+                selectUser: '请选择用户。',
+                loadError: '无法加载VexFlow库。请检查网络连接后刷新。'
+            }
+        };
+
+        function t(key) {
+            return (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
+        }
+
+        function applyLanguage() {
+            // 점수 라벨
+            document.getElementById('lblScore').textContent = t('score');
+            document.getElementById('lblBest').textContent = t('best');
+            document.getElementById('lblMult').textContent = t('multiplier');
+            document.getElementById('lblTime').textContent = t('time');
+
+            // 난이도 버튼
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                const diff = btn.getAttribute('data-diff');
+                if (diff === 'beginner') btn.textContent = t('beginner');
+                else if (diff === 'intermediate') btn.textContent = t('intermediate');
+                else if (diff === 'advanced') btn.textContent = t('advanced');
+            });
+
+            // 자리표 버튼
+            document.querySelectorAll('.clef-btn').forEach(btn => {
+                const clef = btn.getAttribute('data-clef');
+                if (clef === 'treble') btn.textContent = t('treble');
+                else if (clef === 'bass') btn.textContent = t('bass');
+            });
+
+            // 게임 버튼
+            document.getElementById('startBtn').textContent = t('start');
+            document.getElementById('stopBtn').textContent = t('stop');
+            document.getElementById('restartBtn').textContent = t('restart');
+
+            // 스코어보드 타이틀
+            const sbTitle = document.getElementById('sbTitle');
+            if (sbTitle) sbTitle.textContent = t('scoreBoard');
+
+            // 스코어보드 내용 갱신
+            renderScoreboard();
+        }
 
         // 전체 음표 주파수 (옥타브 1~6)
         const noteFrequencies = {
@@ -1157,11 +1319,13 @@
             isBlackKeyFlat = false;
         }
 
-        const diffNames = {
-            beginner: '초급',
-            intermediate: '중급',
-            advanced: '고급'
-        };
+        function getDiffNames() {
+            return {
+                beginner: t('diffBeginner'),
+                intermediate: t('diffIntermediate'),
+                advanced: t('diffAdvanced')
+            };
+        }
 
         // ===== 사용자 데이터 관리 (LocalStorage) =====
         function loadData() {
@@ -1262,11 +1426,11 @@
         }
 
         function onAddUser() {
-            const name = prompt('새 사용자 이름을 입력하세요:');
+            const name = prompt(t('promptUser'));
             if (!name || !name.trim()) return;
             const trimmed = name.trim();
             if (!addUser(trimmed)) {
-                alert('이미 존재하는 이름입니다.');
+                alert(t('alertExists'));
                 return;
             }
             populateUserSelect();
@@ -1279,10 +1443,10 @@
             if (!currentUser) return;
             const users = getUserList();
             if (users.length <= 1) {
-                alert('최소 1명의 사용자가 필요합니다.');
+                alert(t('alertMinUser'));
                 return;
             }
-            if (!confirm(`"${currentUser}" 사용자를 삭제하시겠습니까?\n모든 점수 기록이 삭제됩니다.`)) return;
+            if (!confirm(t('confirmDelete').replace('{name}', currentUser))) return;
             removeUser(currentUser);
             populateUserSelect();
             onUserChange();
@@ -1300,7 +1464,7 @@
 
             diffs.forEach(diff => {
                 html += `<div class="sb-diff-section">`;
-                html += `<span class="sb-diff-title ${diff}">${diffNames[diff]}</span>`;
+                html += `<span class="sb-diff-title ${diff}">${getDiffNames()[diff]}</span>`;
 
                 // 해당 난이도 점수가 있는 사용자만 추출, 점수 내림차순 정렬
                 const entries = [];
@@ -1311,10 +1475,10 @@
                 entries.sort((a, b) => b.score - a.score);
 
                 if (entries.length === 0 || entries.every(e => e.score === 0)) {
-                    html += `<div class="sb-no-scores">아직 기록이 없습니다</div>`;
+                    html += `<div class="sb-no-scores">${t('noRecords')}</div>`;
                 } else {
                     html += `<table class="sb-table">`;
-                    html += `<tr><th>이름</th><th style="text-align:right">점수</th></tr>`;
+                    html += `<tr><th>${t('name')}</th><th style="text-align:right">${t('scoreCol')}</th></tr>`;
                     entries.forEach(e => {
                         const isCurrent = e.name === currentUser;
                         html += `<tr class="${isCurrent ? 'current-user' : ''}">`;
@@ -1594,7 +1758,7 @@
             renderScoreboard();
             updateBestScoreDisplay();
 
-            const title = stoppedManually ? '🛑 게임 종료!' : '⏰ 시간 종료!';
+            const title = stoppedManually ? t('gameOver') : t('timeUp');
 
             // 게임 종료 화면
             const overlay = document.createElement('div');
@@ -1603,10 +1767,10 @@
             overlay.innerHTML = `
                 <div class="game-over-box">
                     <h2>${title}</h2>
-                    <div>${currentUser || '?'} (${diffNames[currentDifficulty]})</div>
-                    <div class="final-score">${score}점</div>
-                    ${isNewBest ? '<div class="new-best">🎉 새로운 최고점수!</div>' : '<div>최고점수: ' + bestScoreVal + '점</div>'}
-                    <button class="btn" onclick="closeGameOver()">다시 하기</button>
+                    <div>${currentUser || '?'} (${getDiffNames()[currentDifficulty]})</div>
+                    <div class="final-score">${score}${t('points')}</div>
+                    ${isNewBest ? '<div class="new-best">' + t('newBest') + '</div>' : '<div>' + t('bestScore') + ': ' + bestScoreVal + t('points') + '</div>'}
+                    <button class="btn" onclick="closeGameOver()">${t('playAgain')}</button>
                 </div>
             `;
             document.body.appendChild(overlay);
@@ -1643,7 +1807,7 @@
 
         function startGame() {
             if (!currentUser) {
-                alert('사용자를 선택해주세요.');
+                alert(t('selectUser'));
                 return;
             }
             gameActive = true;
@@ -1772,6 +1936,13 @@
         document.getElementById('addUserBtn').addEventListener('click', onAddUser);
         document.getElementById('delUserBtn').addEventListener('click', onDelUser);
 
+        // 언어 선택
+        document.getElementById('langSelect').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('noteTrainerLang', currentLang);
+            applyLanguage();
+        });
+
         // 건반 클릭 (이벤트 위임 - 동적 건반 지원)
         document.getElementById('noteButtons').addEventListener('click', (e) => {
             const btn = e.target.closest('.piano-key, .black-key');
@@ -1796,13 +1967,20 @@
 
         // ===== 초기화 =====
         function initializePage() {
+            // 저장된 언어 불러오기
+            const savedLang = localStorage.getItem('noteTrainerLang');
+            if (savedLang && translations[savedLang]) {
+                currentLang = savedLang;
+                document.getElementById('langSelect').value = currentLang;
+            }
+
             initAudio();
             populateUserSelect();
             updateOctaveDisplay();
             buildPianoKeyboard(currentDifficulty);
             disableKeys();
             updateScore();
-            renderScoreboard();
+            applyLanguage();
             initStaff();
             document.getElementById('loadingMsg').style.display = 'none';
         }
@@ -1820,7 +1998,7 @@
             if (index >= vexFlowCDNs.length) {
                 document.getElementById('loadingMsg').style.display = 'none';
                 document.getElementById('errorMsg').style.display = 'block';
-                document.getElementById('errorMsg').textContent = 'VexFlow 라이브러리를 로드할 수 없습니다. 인터넷 연결을 확인 후 새로고침하세요.';
+                document.getElementById('errorMsg').textContent = t('loadError');
                 return;
             }
 
