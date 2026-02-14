@@ -262,6 +262,9 @@
         .btn-stop { background: #F44336; }
         .btn-stop:disabled { background: #ccc; }
         .btn-restart { background: #2196F3; }
+        .btn-practice { background: #FF9800; }
+        .btn-practice:hover { background: #F57C00; }
+        .btn-practice:disabled { background: #ccc; }
 
         /* 자리표 선택 */
         .clef-btn {
@@ -868,9 +871,9 @@
                 <div class="toolbar-sep"></div>
                 <div class="toolbar-group">
                     <button class="btn btn-start" id="startBtn">Start</button>
+                    <button class="btn btn-practice" id="practiceBtn">Practice</button>
                     <button class="btn btn-stop" id="stopBtn" disabled>Stop</button>
                     <button class="btn btn-restart" id="restartBtn" disabled>Restart</button>
-
                 </div>
             </div>
 
@@ -915,6 +918,7 @@
         let currentClef = 'treble';
         let currentUser = null;
         let currentLang = 'en';
+        let practiceMode = false;
 
         const STORAGE_KEY = 'noteTrainerData';
 
@@ -924,7 +928,7 @@
                 score: 'Score', best: 'Best', multiplier: 'Mult', time: 'Time',
                 treble: 'Treble', bass: 'Bass',
                 beginner: 'Beginner', intermediate: 'Inter', advanced: 'Adv',
-                start: 'Start', stop: 'Stop', restart: 'Restart',
+                start: 'Start', stop: 'Stop', restart: 'Restart', practice: 'Practice',
                 scoreBoard: '🏆 Score Board',
                 noRecords: 'No records yet',
                 name: 'Name', scoreCol: 'Score',
@@ -936,13 +940,14 @@
                 alertMinUser: 'At least 1 user is required.',
                 confirmDelete: 'Delete user "{name}"?\nAll score records will be deleted.',
                 selectUser: 'Please select a user.',
+                practiceComplete: 'Practice Complete!',
                 loadError: 'Cannot load VexFlow library. Check internet connection and refresh.'
             },
             es: {
                 score: 'Puntos', best: 'Mejor', multiplier: 'Mult', time: 'Tiempo',
                 treble: 'Agudo', bass: 'Grave',
                 beginner: 'Fácil', intermediate: 'Medio', advanced: 'Difícil',
-                start: 'Iniciar', stop: 'Parar', restart: 'Reiniciar',
+                start: 'Iniciar', stop: 'Parar', restart: 'Reiniciar', practice: 'Práctica',
                 scoreBoard: '🏆 Puntuación',
                 noRecords: 'Sin registros',
                 name: 'Nombre', scoreCol: 'Puntos',
@@ -954,13 +959,14 @@
                 alertMinUser: 'Se necesita al menos 1 usuario.',
                 confirmDelete: '¿Eliminar usuario "{name}"?\nSe borrarán todos los registros.',
                 selectUser: 'Por favor seleccione un usuario.',
+                practiceComplete: '¡Práctica completada!',
                 loadError: 'No se puede cargar VexFlow. Verifique la conexión y recargue.'
             },
             ko: {
                 score: '점수', best: '최고', multiplier: '배율', time: '시간',
                 treble: '높은음', bass: '낮은음',
                 beginner: '초급', intermediate: '중급', advanced: '고급',
-                start: '시작', stop: '정지', restart: '재시작',
+                start: '시작', stop: '정지', restart: '재시작', practice: '연습',
                 scoreBoard: '🏆 점수판',
                 noRecords: '아직 기록이 없습니다',
                 name: '이름', scoreCol: '점수',
@@ -972,13 +978,14 @@
                 alertMinUser: '최소 1명의 사용자가 필요합니다.',
                 confirmDelete: '"{name}" 사용자를 삭제하시겠습니까?\n모든 점수 기록이 삭제됩니다.',
                 selectUser: '사용자를 선택해주세요.',
+                practiceComplete: '연습 완료!',
                 loadError: 'VexFlow 라이브러리를 로드할 수 없습니다. 인터넷 연결을 확인 후 새로고침하세요.'
             },
             ja: {
                 score: 'スコア', best: '最高', multiplier: '倍率', time: '時間',
                 treble: 'ト音', bass: 'ヘ音',
                 beginner: '初級', intermediate: '中級', advanced: '上級',
-                start: '開始', stop: '停止', restart: 'リセット',
+                start: '開始', stop: '停止', restart: 'リセット', practice: '練習',
                 scoreBoard: '🏆 スコアボード',
                 noRecords: '記録がありません',
                 name: '名前', scoreCol: 'スコア',
@@ -990,13 +997,14 @@
                 alertMinUser: 'ユーザーは最低1人必要です。',
                 confirmDelete: '「{name}」を削除しますか？\nすべてのスコアが削除されます。',
                 selectUser: 'ユーザーを選択してください。',
+                practiceComplete: '練習完了！',
                 loadError: 'VexFlowを読み込めません。接続を確認して再読み込みしてください。'
             },
             zh: {
                 score: '分数', best: '最高', multiplier: '倍率', time: '时间',
                 treble: '高音', bass: '低音',
                 beginner: '初级', intermediate: '中级', advanced: '高级',
-                start: '开始', stop: '停止', restart: '重新开始',
+                start: '开始', stop: '停止', restart: '重新开始', practice: '练习',
                 scoreBoard: '🏆 排行榜',
                 noRecords: '暂无记录',
                 name: '姓名', scoreCol: '分数',
@@ -1008,6 +1016,7 @@
                 alertMinUser: '至少需要1个用户。',
                 confirmDelete: '删除用户"{name}"？\n所有分数记录将被删除。',
                 selectUser: '请选择用户。',
+                practiceComplete: '练习完成！',
                 loadError: '无法加载VexFlow库。请检查网络连接后刷新。'
             }
         };
@@ -1040,6 +1049,7 @@
 
             // 게임 버튼
             document.getElementById('startBtn').textContent = t('start');
+            document.getElementById('practiceBtn').textContent = t('practice');
             document.getElementById('stopBtn').textContent = t('stop');
             document.getElementById('restartBtn').textContent = t('restart');
 
@@ -1573,7 +1583,11 @@
         // ===== 게임 로직 =====
         function getRandomNote() {
             const pool = generateNotePool(currentClef, currentDifficulty, octaveOffset);
-            return pool[Math.floor(Math.random() * pool.length)];
+            let note;
+            do {
+                note = pool[Math.floor(Math.random() * pool.length)];
+            } while (note === currentNote && pool.length > 1);
+            return note;
         }
 
         function updateBestScoreDisplay() {
@@ -1644,7 +1658,12 @@
             // 자연음이면 이전 상태 유지
 
             try {
-                renderStaff(currentNote, null, null);
+                // 연습모드: 계이름 라벨 항상 표시
+                if (practiceMode) {
+                    renderStaff(currentNote, currentNote, 'practice');
+                } else {
+                    renderStaff(currentNote, null, null);
+                }
             } catch (e) {
                 console.error('renderStaff 오류:', e);
             }
@@ -1671,7 +1690,6 @@
 
         function checkAnswer(selectedNote) {
             if (!gameActive || !currentNote || isProcessing) return;
-            isProcessing = true;
 
             const isCorrect = (selectedNote === currentNote);
 
@@ -1680,35 +1698,53 @@
 
             clearKeyHighlights();
 
-            if (isCorrect) {
-                score += getScoreMultiplier();
-                updateScore();
-                addToHistory(currentNote, 'blue');
-                renderStaff(currentNote, currentNote, 'blue');
-                highlightKey(selectedNote, 'key-correct');
-                pendingHistory = null;
-            } else {
-                score = Math.max(0, score - 1);
-                updateScore();
-                // 정답 음표는 검은색 + 계이름 라벨, 틀린 음표는 빨간색으로 겹침
-                renderStaff(currentNote, currentNote, 'red', selectedNote);
-                highlightKey(selectedNote, 'key-wrong');
-                highlightKey(currentNote, 'key-show-answer');
-                // 다음 음으로 넘어갈 때 히스토리에 추가
-                pendingHistory = { note: currentNote, color: 'red' };
-            }
-
-            setTimeout(() => {
-                if (gameActive) {
-                    // 보류중인 히스토리가 있으면 이제 추가
-                    if (pendingHistory) {
-                        addToHistory(pendingHistory.note, pendingHistory.color);
-                        pendingHistory = null;
-                    }
-                    showNextNote();
+            if (practiceMode) {
+                // === 연습 모드 ===
+                if (isCorrect) {
+                    isProcessing = true;
+                    renderStaff(currentNote, currentNote, 'blue');
+                    highlightKey(selectedNote, 'key-correct');
+                    addToHistory(currentNote, 'blue');
+                    setTimeout(() => {
+                        if (gameActive) showNextNote();
+                        isProcessing = false;
+                    }, 400);
+                } else {
+                    // 틀리면 빨간색 표시, 다음 음으로 안 넘어감 (맞을 때까지 대기)
+                    renderStaff(currentNote, currentNote, 'practice', selectedNote);
+                    highlightKey(selectedNote, 'key-wrong');
                 }
-                isProcessing = false;
-            }, isCorrect ? 400 : 800);
+            } else {
+                // === 일반 모드 ===
+                isProcessing = true;
+
+                if (isCorrect) {
+                    score += getScoreMultiplier();
+                    updateScore();
+                    addToHistory(currentNote, 'blue');
+                    renderStaff(currentNote, currentNote, 'blue');
+                    highlightKey(selectedNote, 'key-correct');
+                    pendingHistory = null;
+                } else {
+                    score = Math.max(0, score - 1);
+                    updateScore();
+                    renderStaff(currentNote, currentNote, 'red', selectedNote);
+                    highlightKey(selectedNote, 'key-wrong');
+                    highlightKey(currentNote, 'key-show-answer');
+                    pendingHistory = { note: currentNote, color: 'red' };
+                }
+
+                setTimeout(() => {
+                    if (gameActive) {
+                        if (pendingHistory) {
+                            addToHistory(pendingHistory.note, pendingHistory.color);
+                            pendingHistory = null;
+                        }
+                        showNextNote();
+                    }
+                    isProcessing = false;
+                }, isCorrect ? 400 : 800);
+            }
         }
 
         // ===== 타이머 =====
@@ -1749,6 +1785,23 @@
             stopTimer();
             disableKeys();
             document.getElementById('stopBtn').disabled = true;
+
+            if (practiceMode) {
+                // 연습 모드 종료 화면
+                const title = stoppedManually ? t('gameOver') : t('timeUp');
+                const overlay = document.createElement('div');
+                overlay.className = 'game-over-overlay';
+                overlay.id = 'gameOverOverlay';
+                overlay.innerHTML = `
+                    <div class="game-over-box">
+                        <h2>${title}</h2>
+                        <div>${t('practiceComplete')}</div>
+                        <button class="btn" onclick="closeGameOver()">${t('playAgain')}</button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                return;
+            }
 
             // 사용자별 최고점수 저장
             const isNewBest = currentUser ? setUserBest(currentUser, currentDifficulty, score) : false;
@@ -1805,11 +1858,12 @@
             });
         }
 
-        function startGame() {
-            if (!currentUser) {
+        function startGame(isPractice) {
+            if (!isPractice && !currentUser) {
                 alert(t('selectUser'));
                 return;
             }
+            practiceMode = !!isPractice;
             gameActive = true;
             score = 0;
             updateScore();
@@ -1817,6 +1871,7 @@
             setStaffClef(currentClef);
             buildPianoKeyboard(currentDifficulty);
             document.getElementById('startBtn').disabled = true;
+            document.getElementById('practiceBtn').disabled = true;
             document.getElementById('stopBtn').disabled = false;
             document.getElementById('restartBtn').disabled = false;
             document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = true);
@@ -1833,6 +1888,7 @@
 
         function restartGame() {
             gameActive = false;
+            practiceMode = false;
             stopTimer();
             score = 0;
             timeLeft = GAME_TIME;
@@ -1840,6 +1896,7 @@
             updateScore();
             clearKeyHighlights();
             document.getElementById('startBtn').disabled = false;
+            document.getElementById('practiceBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
             document.getElementById('restartBtn').disabled = true;
             document.getElementById('timer').classList.remove('timer-warning');
@@ -1924,7 +1981,12 @@
 
         document.getElementById('startBtn').addEventListener('click', () => {
             unlockAudio();
-            startGame();
+            startGame(false);
+        });
+
+        document.getElementById('practiceBtn').addEventListener('click', () => {
+            unlockAudio();
+            startGame(true);
         });
 
         document.getElementById('stopBtn').addEventListener('click', () => {
