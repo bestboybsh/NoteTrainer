@@ -151,6 +151,14 @@
             color: #2196F3;
         }
 
+        .score-value.multiplier {
+            color: #FF9800;
+        }
+
+        .score-value.multiplier.high {
+            color: #F44336;
+        }
+
         .staff-container {
             background: white;
             border: 2px solid #ddd;
@@ -291,6 +299,51 @@
         .diff-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* 옥타브 선택 */
+        .octave-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .octave-btn {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            background: white;
+            color: #555;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .octave-btn:hover:not(:disabled) {
+            border-color: #FF9800;
+            color: #FF9800;
+            background: #FFF8E1;
+        }
+
+        .octave-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .octave-display {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #555;
+            min-width: 90px;
+            text-align: center;
         }
 
         .piano-container {
@@ -634,6 +687,9 @@
             body { padding: 5px; }
             h1 { font-size: 1.2rem; margin-bottom: 4px; }
             .user-section { margin-bottom: 4px; gap: 4px; }
+            .octave-container { margin-bottom: 3px; gap: 5px; }
+            .octave-btn { width: 26px; height: 26px; font-size: 0.75rem; }
+            .octave-display { font-size: 0.8rem; min-width: 70px; }
             .score-container { margin-bottom: 4px; gap: 12px; font-size: 0.85rem; }
             .score-value { font-size: 1.1rem; }
             .clef-container { margin-bottom: 4px; gap: 6px; }
@@ -775,6 +831,10 @@
                     <span class="score-value" id="bestScore">0</span>
                 </div>
                 <div class="score-item">
+                    <span>배율</span>
+                    <span class="score-value multiplier" id="multiplierDisplay">x1</span>
+                </div>
+                <div class="score-item">
                     <span>Time</span>
                     <span class="score-value" id="timer">1:00</span>
                 </div>
@@ -789,6 +849,12 @@
                 <button class="diff-btn active" data-diff="beginner">초급</button>
                 <button class="diff-btn" data-diff="intermediate">중급</button>
                 <button class="diff-btn" data-diff="advanced">고급</button>
+            </div>
+
+            <div class="octave-container">
+                <button class="octave-btn" id="octaveDown" title="옥타브 내리기">◀</button>
+                <span class="octave-display" id="octaveDisplay">C4 ~ B4</span>
+                <button class="octave-btn" id="octaveUp" title="옥타브 올리기">▶</button>
             </div>
 
             <div class="controls">
@@ -838,8 +904,10 @@
 
         const STORAGE_KEY = 'noteTrainerData';
 
-        // 전체 음표 주파수 (자연음 + 샵 + 플랫)
+        // 전체 음표 주파수 (옥타브 1~6)
         const noteFrequencies = {
+            'C1': 32.70, 'D1': 36.71, 'E1': 41.20, 'F1': 43.65,
+            'G1': 49.00, 'A1': 55.00, 'B1': 61.74,
             'C2': 65.41, 'D2': 73.42, 'E2': 82.41, 'F2': 87.31,
             'G2': 98.00, 'A2': 110.00, 'B2': 123.47,
             'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61,
@@ -848,61 +916,188 @@
             'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
             'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46,
             'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
+            'C6': 1046.50, 'D6': 1174.66, 'E6': 1318.51, 'F6': 1396.91,
+            'G6': 1567.98, 'A6': 1760.00, 'B6': 1975.53,
+            'C#1': 34.65, 'D#1': 38.89, 'F#1': 46.25, 'G#1': 51.91, 'A#1': 58.27,
+            'Db1': 34.65, 'Eb1': 38.89, 'Gb1': 46.25, 'Ab1': 51.91, 'Bb1': 58.27,
             'C#2': 69.30, 'D#2': 77.78, 'F#2': 92.50, 'G#2': 103.83, 'A#2': 116.54,
             'Db2': 69.30, 'Eb2': 77.78, 'Gb2': 92.50, 'Ab2': 103.83, 'Bb2': 116.54,
             'C#3': 138.59, 'D#3': 155.56, 'F#3': 185.00, 'G#3': 207.65, 'A#3': 233.08,
             'Db3': 138.59, 'Eb3': 155.56, 'Gb3': 185.00, 'Ab3': 207.65, 'Bb3': 233.08,
             'C#4': 277.18, 'D#4': 311.13, 'F#4': 369.99, 'G#4': 415.30, 'A#4': 466.16,
             'Db4': 277.18, 'Eb4': 311.13, 'Gb4': 369.99, 'Ab4': 415.30, 'Bb4': 466.16,
-            'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61,
-            'Db5': 554.37, 'Eb5': 622.25, 'Gb5': 739.99, 'Ab5': 830.61
+            'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61, 'A#5': 932.33,
+            'Db5': 554.37, 'Eb5': 622.25, 'Gb5': 739.99, 'Ab5': 830.61, 'Bb5': 932.33,
+            'C#6': 1108.73, 'D#6': 1244.51, 'F#6': 1479.98, 'G#6': 1661.22, 'A#6': 1864.66,
+            'Db6': 1108.73, 'Eb6': 1244.51, 'Gb6': 1479.98, 'Ab6': 1661.22, 'Bb6': 1864.66
         };
 
-        // 난이도 + 자리표별 음표 풀
-        const notePools = {
-            treble: {
-                beginner: [
-                    'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'
-                ],
-                intermediate: [
-                    'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
-                    'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
-                    'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4'
-                ],
-                advanced: [
-                    'G3', 'A3', 'B3',
-                    'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
-                    'C5', 'D5', 'E5', 'F5', 'G5', 'A5',
-                    'G#3', 'A#3',
-                    'C#4', 'D#4', 'F#4', 'G#4', 'A#4',
-                    'C#5', 'D#5', 'F#5', 'G#5',
-                    'Ab3', 'Bb3',
-                    'Db4', 'Eb4', 'Gb4', 'Ab4', 'Bb4',
-                    'Db5', 'Eb5', 'Gb5', 'Ab5'
-                ]
-            },
-            bass: {
-                beginner: [
-                    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'
-                ],
-                intermediate: [
-                    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
-                    'C#3', 'D#3', 'F#3', 'G#3', 'A#3',
-                    'Db3', 'Eb3', 'Gb3', 'Ab3', 'Bb3'
-                ],
-                advanced: [
-                    'G2', 'A2', 'B2',
-                    'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
-                    'C4', 'D4', 'E4',
-                    'G#2', 'A#2',
-                    'C#3', 'D#3', 'F#3', 'G#3', 'A#3',
-                    'C#4', 'D#4',
-                    'Ab2', 'Bb2',
-                    'Db3', 'Eb3', 'Gb3', 'Ab3', 'Bb3',
-                    'Db4', 'Eb4'
-                ]
+        // ===== 옥타브 오프셋 =====
+        let octaveOffset = 0; // -1, 0, +1
+
+        // 기본 시작 옥타브 (자리표별, 초/중급)
+        // 높은음자리표: 기본 C4, 낮은음자리표: 기본 C3
+        function getBaseOctaves(clef, difficulty) {
+            if (difficulty === 'advanced') return null; // 고급은 별도 처리
+            if (clef === 'treble') return [4];
+            return [3];
+        }
+
+        // 고급 범위: F3~E5 (offset 적용)
+        const ADV_BASE_LOW = 'F';  // 시작 음
+        const ADV_BASE_LOW_OCT = 3;
+        const ADV_BASE_HIGH = 'E'; // 끝 음
+        const ADV_BASE_HIGH_OCT = 5;
+
+        // 고급 범위의 모든 자연음 (F~E 순서)
+        const advancedNaturalOrder = ['F', 'G', 'A', 'B', 'C', 'D', 'E'];
+        // 고급 범위의 샵 (F부터 E까지 사이)
+        const advancedSharpOrder = ['F#', 'G#', 'A#', 'C#', 'D#'];
+        const advancedFlatOrder = ['Gb', 'Ab', 'Bb', 'Db', 'Eb'];
+
+        function generateAdvancedNotePool(offset) {
+            const lowOct = ADV_BASE_LOW_OCT + offset;
+            const highOct = ADV_BASE_HIGH_OCT + offset;
+            const pool = [];
+            // F(lowOct) ~ B(lowOct)
+            ['F','G','A','B'].forEach(n => {
+                pool.push(n + lowOct);
+                // 샵/플랫
+                if (['F','G','A'].includes(n)) {
+                    pool.push(n + '#' + lowOct);
+                    const flatMap = {'F':'Gb','G':'Ab','A':'Bb'};
+                    pool.push(flatMap[n] + lowOct);
+                }
+            });
+            // C(lowOct+1) ~ B(lowOct+1) (full middle octave)
+            const midOct = lowOct + 1;
+            ['C','D','E','F','G','A','B'].forEach(n => {
+                pool.push(n + midOct);
+            });
+            ['C#','D#','F#','G#','A#'].forEach(s => pool.push(s + midOct));
+            ['Db','Eb','Gb','Ab','Bb'].forEach(f => pool.push(f + midOct));
+            // C(highOct) ~ E(highOct)
+            ['C','D','E'].forEach(n => {
+                pool.push(n + highOct);
+            });
+            ['C#','D#'].forEach(s => pool.push(s + highOct));
+            ['Db','Eb'].forEach(f => pool.push(f + highOct));
+            return pool;
+        }
+
+        function generateAdvancedWhiteKeys(offset) {
+            const lowOct = ADV_BASE_LOW_OCT + offset;
+            const highOct = ADV_BASE_HIGH_OCT + offset;
+            const midOct = lowOct + 1;
+            const keys = [];
+            ['F','G','A','B'].forEach(n => keys.push(n + lowOct));
+            ['C','D','E','F','G','A','B'].forEach(n => keys.push(n + midOct));
+            ['C','D','E'].forEach(n => keys.push(n + highOct));
+            return keys;
+        }
+
+        // 동적 음표 풀 생성
+        function generateNotePool(clef, difficulty, offset) {
+            if (difficulty === 'advanced') {
+                return generateAdvancedNotePool(offset);
             }
-        };
+            const baseOcts = getBaseOctaves(clef, difficulty);
+            const octaves = baseOcts.map(o => o + offset);
+            const naturals = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const sharps = ['C#', 'D#', 'F#', 'G#', 'A#'];
+            const flats = ['Db', 'Eb', 'Gb', 'Ab', 'Bb'];
+
+            const pool = [];
+            octaves.forEach(oct => {
+                naturals.forEach(n => pool.push(n + oct));
+                if (difficulty !== 'beginner') {
+                    sharps.forEach(s => pool.push(s + oct));
+                    flats.forEach(f => pool.push(f + oct));
+                }
+            });
+            return pool;
+        }
+
+        // 동적 건반 설정 생성
+        function generateKeyboardConfig(clef, difficulty, offset) {
+            if (difficulty === 'advanced') {
+                return {
+                    whiteKeys: generateAdvancedWhiteKeys(offset),
+                    showBlack: true,
+                    compact: true
+                };
+            }
+            const baseOcts = getBaseOctaves(clef, difficulty);
+            const octaves = baseOcts.map(o => o + offset);
+            const naturals = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const whiteKeys = [];
+            octaves.forEach(oct => {
+                naturals.forEach(n => whiteKeys.push(n + oct));
+            });
+            return { whiteKeys, showBlack: true, compact: false };
+        }
+
+        // 옥타브 범위 텍스트
+        function getOctaveRangeText() {
+            if (currentDifficulty === 'advanced') {
+                const lowOct = ADV_BASE_LOW_OCT + octaveOffset;
+                const highOct = ADV_BASE_HIGH_OCT + octaveOffset;
+                return 'F' + lowOct + ' ~ E' + highOct;
+            }
+            const baseOcts = getBaseOctaves(currentClef, currentDifficulty);
+            const octaves = baseOcts.map(o => o + octaveOffset);
+            const low = 'C' + octaves[0];
+            const high = 'B' + octaves[octaves.length - 1];
+            return low + ' ~ ' + high;
+        }
+
+        // 옥타브 표시 업데이트
+        // 높은음자리표: C3~C6, 낮은음자리표: C2~C5
+        function getOctaveLimits(clef) {
+            if (clef === 'bass') {
+                return { min: 2, max: 5 };
+            } else {
+                return { min: 3, max: 6 };
+            }
+        }
+
+        function updateOctaveDisplay() {
+            const display = document.getElementById('octaveDisplay');
+            if (display) display.textContent = getOctaveRangeText();
+            const limits = getOctaveLimits(currentClef);
+            let lowestIfDown, highestIfUp;
+            if (currentDifficulty === 'advanced') {
+                lowestIfDown = ADV_BASE_LOW_OCT + octaveOffset - 1;
+                highestIfUp = ADV_BASE_HIGH_OCT + octaveOffset + 1;
+            } else {
+                const baseOcts = getBaseOctaves(currentClef, currentDifficulty);
+                lowestIfDown = Math.min(...baseOcts) + octaveOffset - 1;
+                highestIfUp = Math.max(...baseOcts) + octaveOffset + 1;
+            }
+            const downBtn = document.getElementById('octaveDown');
+            const upBtn = document.getElementById('octaveUp');
+            if (downBtn) downBtn.disabled = (lowestIfDown < limits.min);
+            if (upBtn) upBtn.disabled = (highestIfUp > limits.max);
+            updateMultiplierDisplay();
+        }
+
+        // 점수 배율 계산
+        // 옥타브 변경(offset ≠ 0) → x2, 낮은음자리표 → x2, 중첩 가능
+        function getScoreMultiplier() {
+            let mult = 1;
+            if (currentClef === 'bass') mult *= 2;
+            if (octaveOffset !== 0) mult *= 2;
+            return mult;
+        }
+
+        function updateMultiplierDisplay() {
+            const mult = getScoreMultiplier();
+            const el = document.getElementById('multiplierDisplay');
+            if (el) {
+                el.textContent = 'x' + mult;
+                el.classList.toggle('high', mult >= 4);
+            }
+        }
 
         // 샵 ↔ 플랫 변환
         const flatToSharp = {
@@ -912,37 +1107,7 @@
             'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
         };
 
-        // 건반 설정 (자리표 + 난이도별)
-        const keyboardConfigs = {
-            treble: {
-                beginner: {
-                    whiteKeys: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'],
-                    showBlack: true, compact: false
-                },
-                intermediate: {
-                    whiteKeys: ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'],
-                    showBlack: true, compact: false
-                },
-                advanced: {
-                    whiteKeys: ['G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5'],
-                    showBlack: true, compact: true
-                }
-            },
-            bass: {
-                beginner: {
-                    whiteKeys: ['C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'],
-                    showBlack: true, compact: false
-                },
-                intermediate: {
-                    whiteKeys: ['C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3'],
-                    showBlack: true, compact: false
-                },
-                advanced: {
-                    whiteKeys: ['G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4'],
-                    showBlack: true, compact: true
-                }
-            }
-        };
+        // (건반 설정은 generateKeyboardConfig()에서 동적 생성)
 
         // 해당 흰 건반에 검은 건반이 있는지 (E, B는 없음)
         function hasBlackKey(noteName) {
@@ -958,8 +1123,7 @@
 
         // 피아노 건반 동적 생성
         function buildPianoKeyboard(difficulty, clef) {
-            const clefConfigs = keyboardConfigs[clef || currentClef] || keyboardConfigs.treble;
-            const config = clefConfigs[difficulty] || clefConfigs.beginner;
+            const config = generateKeyboardConfig(clef || currentClef, difficulty || currentDifficulty, octaveOffset);
             const piano = document.getElementById('noteButtons');
             piano.innerHTML = '';
 
@@ -1259,8 +1423,7 @@
 
         // ===== 게임 로직 =====
         function getRandomNote() {
-            const clefPool = notePools[currentClef] || notePools.treble;
-            const pool = clefPool[currentDifficulty] || clefPool.beginner;
+            const pool = generateNotePool(currentClef, currentDifficulty, octaveOffset);
             return pool[Math.floor(Math.random() * pool.length)];
         }
 
@@ -1367,7 +1530,7 @@
             clearKeyHighlights();
 
             if (isCorrect) {
-                score++;
+                score += getScoreMultiplier();
                 updateScore();
                 addToHistory(currentNote, 'blue');
                 renderStaff(currentNote, currentNote, 'blue');
@@ -1506,6 +1669,8 @@
             document.getElementById('restartBtn').disabled = false;
             document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = true);
             document.querySelectorAll('.clef-btn').forEach(btn => btn.disabled = true);
+            document.getElementById('octaveDown').disabled = true;
+            document.getElementById('octaveUp').disabled = true;
             document.getElementById('userSelect').disabled = true;
             document.getElementById('addUserBtn').disabled = true;
             document.getElementById('delUserBtn').disabled = true;
@@ -1530,6 +1695,7 @@
             if (overlay) overlay.remove();
             document.querySelectorAll('.diff-btn').forEach(btn => btn.disabled = false);
             document.querySelectorAll('.clef-btn').forEach(btn => btn.disabled = false);
+            updateOctaveDisplay();
             document.getElementById('userSelect').disabled = false;
             document.getElementById('addUserBtn').disabled = false;
             document.getElementById('delUserBtn').disabled = false;
@@ -1557,6 +1723,8 @@
                 document.querySelectorAll('.clef-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentClef = btn.getAttribute('data-clef');
+                octaveOffset = 0;
+                updateOctaveDisplay();
                 setStaffClef(currentClef);
                 buildPianoKeyboard(currentDifficulty);
                 disableKeys();
@@ -1573,10 +1741,33 @@
                 document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentDifficulty = btn.getAttribute('data-diff');
+                octaveOffset = 0;
+                updateOctaveDisplay();
                 buildPianoKeyboard(currentDifficulty);
                 disableKeys();
                 updateBestScoreDisplay();
             });
+        });
+
+        // 옥타브 조절
+        document.getElementById('octaveDown').addEventListener('click', () => {
+            if (gameActive || octaveOffset <= -1) return;
+            octaveOffset--;
+            updateOctaveDisplay();
+            buildPianoKeyboard(currentDifficulty);
+            disableKeys();
+            clearNoteHistory();
+            initStaff();
+        });
+
+        document.getElementById('octaveUp').addEventListener('click', () => {
+            if (gameActive || octaveOffset >= 1) return;
+            octaveOffset++;
+            updateOctaveDisplay();
+            buildPianoKeyboard(currentDifficulty);
+            disableKeys();
+            clearNoteHistory();
+            initStaff();
         });
 
         document.getElementById('startBtn').addEventListener('click', () => {
@@ -1619,6 +1810,7 @@
         function initializePage() {
             initAudio();
             populateUserSelect();
+            updateOctaveDisplay();
             buildPianoKeyboard(currentDifficulty);
             disableKeys();
             updateScore();
