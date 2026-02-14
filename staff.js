@@ -198,7 +198,8 @@ function initStaff() {
 }
 
 // 히스토리 + 현재 음표 렌더링
-function renderStaff(currentNote, feedbackNote, feedbackColor) {
+// wrongNote: 틀렸을 때 사용자가 누른 음표 (빨간색으로 표시)
+function renderStaff(currentNote, feedbackNote, feedbackColor, wrongNote) {
     const VF = getVF();
     if (!VF) {
         console.error('VexFlow를 찾을 수 없습니다');
@@ -224,6 +225,7 @@ function renderStaff(currentNote, feedbackNote, feedbackColor) {
 
     try {
         const tickables = [];
+        const hasWrong = wrongNote && vexFlowNotes[wrongNote];
         const totalSlots = MAX_HISTORY + 2; // 히스토리 + 현재 + 여백
         const usedSlots = noteHistory.length + 1;
 
@@ -249,17 +251,21 @@ function renderStaff(currentNote, feedbackNote, feedbackColor) {
             tickables.push(histNote);
         });
 
-        // 현재 음표 (맨 오른쪽)
+        // 현재 음표 (정답)
         if (currentNote && vexFlowNotes[currentNote]) {
             const stemDir = getStemDirection(currentNote);
-            // 피드백 있으면 음이름 표시, 없으면 숨김
             const showLabel = !!feedbackColor;
             const mainNote = createStaveNote(VF, currentNote, stemDir, showLabel);
 
             if (mainNote) {
                 if (feedbackColor) {
                     const colorMap = { 'blue': '#2196F3', 'red': '#F44336' };
-                    const c = colorMap[feedbackColor] || '#333';
+                    let c;
+                    if (hasWrong) {
+                        c = '#2196F3'; // 틀렸을 때 정답은 항상 파란색
+                    } else {
+                        c = colorMap[feedbackColor] || '#333';
+                    }
                     mainNote.setStyle({ fillStyle: c, strokeStyle: c });
                 }
                 tickables.push(mainNote);
@@ -269,16 +275,45 @@ function renderStaff(currentNote, feedbackNote, feedbackColor) {
         // 뒤에 여백
         tickables.push(new VF.GhostNote({ duration: 'q' }));
 
-        if (tickables.length > 0) {
-            const voice = new VF.Voice({
-                num_beats: tickables.length,
+        // 메인 보이스
+        const voice1 = new VF.Voice({
+            num_beats: tickables.length,
+            beat_value: 4
+        });
+        voice1.setStrict(false);
+        voice1.addTickables(tickables);
+
+        // 틀린 음표를 두 번째 보이스로 (같은 x 위치에 겹침)
+        if (hasWrong) {
+            const wrongTickables = [];
+            // 정답 음표와 같은 위치에 오도록 앞을 GhostNote로 채움
+            for (let i = 0; i < tickables.length - 2; i++) {
+                wrongTickables.push(new VF.GhostNote({ duration: 'q' }));
+            }
+            // 틀린 음표 (빨간색)
+            const wrongStemDir = getStemDirection(wrongNote);
+            const wrongStaveNote = createStaveNote(VF, wrongNote, wrongStemDir, true);
+            if (wrongStaveNote) {
+                const wrongColor = '#F44336';
+                wrongStaveNote.setStyle({ fillStyle: wrongColor, strokeStyle: wrongColor });
+                wrongTickables.push(wrongStaveNote);
+            }
+            // 뒤에 여백
+            wrongTickables.push(new VF.GhostNote({ duration: 'q' }));
+
+            const voice2 = new VF.Voice({
+                num_beats: wrongTickables.length,
                 beat_value: 4
             });
-            voice.setStrict(false);
-            voice.addTickables(tickables);
+            voice2.setStrict(false);
+            voice2.addTickables(wrongTickables);
 
-            new VF.Formatter().joinVoices([voice]).format([voice], staveWidth - 80);
-            voice.draw(context, stave);
+            new VF.Formatter().joinVoices([voice1]).joinVoices([voice2]).format([voice1, voice2], staveWidth - 80);
+            voice1.draw(context, stave);
+            voice2.draw(context, stave);
+        } else {
+            new VF.Formatter().joinVoices([voice1]).format([voice1], staveWidth - 80);
+            voice1.draw(context, stave);
         }
     } catch (e) {
         console.error('renderStaff 오류:', e);

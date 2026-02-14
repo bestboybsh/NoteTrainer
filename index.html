@@ -1366,6 +1366,8 @@
             return noteName;
         }
 
+        let pendingHistory = null; // 다음 음표로 넘어갈 때 히스토리에 추가할 항목
+
         function checkAnswer(selectedNote) {
             if (!gameActive || !currentNote) return;
 
@@ -1382,17 +1384,27 @@
                 addToHistory(currentNote, 'blue');
                 renderStaff(currentNote, currentNote, 'blue');
                 highlightKey(selectedNote, 'key-correct');
+                pendingHistory = null;
             } else {
                 score = Math.max(0, score - 1);
                 updateScore();
-                addToHistory(currentNote, 'red');
-                renderStaff(currentNote, currentNote, 'red');
+                // 히스토리에 바로 넣지 않고, 현재 위치에서 정답+오답 표시
+                renderStaff(currentNote, currentNote, 'red', selectedNote);
                 highlightKey(selectedNote, 'key-wrong');
                 highlightKey(currentNote, 'key-show-answer');
+                // 다음 음으로 넘어갈 때 히스토리에 추가
+                pendingHistory = { note: currentNote, color: 'red' };
             }
 
             setTimeout(() => {
-                if (gameActive) showNextNote();
+                if (gameActive) {
+                    // 보류중인 히스토리가 있으면 이제 추가
+                    if (pendingHistory) {
+                        addToHistory(pendingHistory.note, pendingHistory.color);
+                        pendingHistory = null;
+                    }
+                    showNextNote();
+                }
             }, isCorrect ? 400 : 800);
         }
 
